@@ -26,57 +26,57 @@ export default function htmlMinifier(
 				const controller = new AbortController();
 				const signal = controller.signal;
 				const distPath = fileURLToPath(distUrl);
+				const logLineArrow = styleText("green", "▶");
 				for (const assetUrls of assets.values()) {
 					for (const assetUrl of assetUrls) {
 						const assetPath = fileURLToPath(assetUrl);
-						if (assetPath.toLowerCase().endsWith(".html")) {
-							tasks.push(async () => {
-								const timeStart = performance.now(); // --- TIMED BLOCK START ---
-
-								const html = await readFile(assetPath, {
-									encoding: "utf8",
-									signal,
-								});
-								const minifiedHtml = await minifyHtml(html, options);
-
-								const htmlSize = Buffer.byteLength(html, "utf8");
-								const minifiedHtmlSize = Buffer.byteLength(
-									minifiedHtml,
-									"utf8",
-								);
-								if (minifiedHtmlSize >= htmlSize) {
-									// No actual file size savings, so we skip writing the file or logging anything.
-									return;
-								}
-
-								await writeFile(assetPath, minifiedHtml, {
-									encoding: "utf8",
-									signal,
-								});
-
-								const timeEnd = performance.now(); // --- TIMED BLOCK END ---
-
-								// Log a nice summary of the minification savings and the time it took.
-								const relativeAssetPath = getRelativePath(distPath, assetPath);
-								const savings = htmlSize - minifiedHtmlSize;
-								const savingsStr =
-									savings < 1000
-										? `${savings}B`
-										: savings < 1000000
-											? `${(savings / 1000).toFixed(1)}kB`
-											: `${(savings / 1000000).toFixed(2)}MB`;
-								const time = timeEnd - timeStart;
-								const timeStr =
-									time < 1000
-										? `${Math.round(time)}ms`
-										: `${(time / 1000).toFixed(2)}s`;
-								logger.info(
-									styleText("green", "  ▶") +
-										` /${relativeAssetPath} ` +
-										styleText("dim", `(-${savingsStr}) (+${timeStr})`),
-								);
-							});
+						if (!assetPath.toLowerCase().endsWith(".html")) {
+							continue;
 						}
+
+						const relativeAssetPath = getRelativePath(distPath, assetPath);
+						const logLineAssetPath = `  ${logLineArrow} /${relativeAssetPath} `;
+						tasks.push(async () => {
+							const timeStart = performance.now(); // --- TIMED BLOCK START ---
+
+							const html = await readFile(assetPath, {
+								encoding: "utf8",
+								signal,
+							});
+							const minifiedHtml = await minifyHtml(html, options);
+
+							const htmlSize = Buffer.byteLength(html);
+							const minifiedHtmlSize = Buffer.byteLength(minifiedHtml);
+							if (minifiedHtmlSize >= htmlSize) {
+								// No actual file size savings, so we skip writing the file or logging anything.
+								return;
+							}
+
+							await writeFile(assetPath, minifiedHtml, {
+								encoding: "utf8",
+								signal,
+							});
+
+							const timeEnd = performance.now(); // --- TIMED BLOCK END ---
+
+							// Log a nice summary of the minification savings and the time it took.
+							const savings = htmlSize - minifiedHtmlSize;
+							const savingsStr =
+								savings < 1000
+									? `${savings}B`
+									: savings < 1000000
+										? `${(savings / 1000).toFixed(1)}kB`
+										: `${(savings / 1000000).toFixed(2)}MB`;
+							const time = timeEnd - timeStart;
+							const timeStr =
+								time < 1000
+									? `${Math.round(time)}ms`
+									: `${(time / 1000).toFixed(2)}s`;
+							logger.info(
+								logLineAssetPath +
+									styleText("dim", `(-${savingsStr}) (+${timeStr})`),
+							);
+						});
 					}
 				}
 
