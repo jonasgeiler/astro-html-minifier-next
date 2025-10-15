@@ -17,7 +17,7 @@ export default function htmlMinifier(
 		name: "astro-html-minifier-next",
 		hooks: {
 			"astro:build:done": async ({ logger, dir: distUrl, assets }) => {
-				logger.info(styleText("bgGreen", " minifying html assets "));
+				logger.info(styleText(["bgGreen", "black"], " minifying html assets "));
 
 				const totalTimeStart = performance.now(); // --- TIMED BLOCK START ---
 
@@ -124,7 +124,7 @@ export default function htmlMinifier(
 					totalTime < 1000
 						? `${Math.round(totalTime)}ms`
 						: `${(totalTime / 1000).toFixed(2)}s`;
-				logger.info(styleText("green", `✓ Completed in ${totalTimeStr}`));
+				logger.info(styleText("green", `✓ Completed in ${totalTimeStr}.`));
 			},
 		},
 	};
