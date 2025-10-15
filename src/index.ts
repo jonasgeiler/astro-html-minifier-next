@@ -9,6 +9,14 @@ import {
 	minify as minifyHtml,
 } from "html-minifier-next";
 
+/**
+ * An Astro integration that minifies HTML assets using
+ * [html-minifier-next](https://www.npmjs.com/package/html-minifier-next).
+ *
+ * @param options The options passed to the `minify` function of
+ *   [html-minifier-next](https://www.npmjs.com/package/html-minifier-next).
+ * @returns The Astro integration.
+ */
 export default function htmlMinifier(
 	options: HTMLMinifierOptions,
 ): AstroIntegration {
