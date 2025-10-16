@@ -58,58 +58,27 @@ export default function htmlMinifier(
 		name: "astro-html-minifier-next",
 		hooks: {
 			"astro:build:done": async ({ logger, dir: distUrl, assets }) => {
-				logger.info(styleText(["bgGreen", "black"], " minifying html assets "));
-
-				const totalTimeStart = performance.now(); // --- TIMED BLOCK START ---
 
 				const availableParallelism = getAvailableParallelism();
 				const {
 					maxWorkers = Math.max(1, availableParallelism - 1),
 					...minifyHtmlOptions
 				} = options;
-				if (maxWorkers > 0 && isTransferable(minifyHtmlOptions)) {
-					// We can use worker threads! Speed!
+				const useWorkers = maxWorkers > 0 && isTransferable(minifyHtmlOptions);
 
-					const pool: Worker[] = [];
-					const idlePool: Worker[] = [];
-					const queue = [];
+				const tasks: (() => Promise<void>)[] = [];
 
-					const getAvailableWorker = () => {
-						// has idle one?
-						if (idlePool.length) {
-							return idlePool.shift();
+				const controller = new AbortController();
+				const signal = controller.signal;
+
+				for (const assetUrls of assets.values()) {
+					for (const assetUrl of assetUrls) {
+						const assetPath = fileURLToPath(assetUrl);
+						if (!assetPath.toLowerCase().endsWith(".html")) {
+							continue;
 						}
 
-						// can spawn more?
-						if (pool.length < maxWorkers) {
-							const worker = new Worker('./worker.js');
-
-							worker.on('message', ({ result, error }) => {
-								if (result) {
-
-								}
-							})
-						}
-					}
-				} else {
-					// We can't use worker threads... Slow...
-
-					const tasks: (() => Promise<void>)[] = [];
-					const controller = new AbortController();
-					const signal = controller.signal;
-					const distPath = fileURLToPath(distUrl);
-					const logLineArrow = styleText("green", "▶");
-					for (const assetUrls of assets.values()) {
-						for (const assetUrl of assetUrls) {
-							const assetPath = fileURLToPath(assetUrl);
-							if (!assetPath.toLowerCase().endsWith(".html")) {
-								continue;
-							}
-
-							const relativeAssetPath = getRelativePath(distPath, assetPath);
-							const logLineAssetPath = `  ${logLineArrow} /${relativeAssetPath} `;
 							tasks.push(async () => {
-								const timeStart = performance.now(); // --- TIMED BLOCK START ---
 
 								const html = await readFile(assetPath, {
 									encoding: "utf8",
@@ -128,29 +97,8 @@ export default function htmlMinifier(
 									encoding: "utf8",
 									signal,
 								});
-
-								const timeEnd = performance.now(); // --- TIMED BLOCK END ---
-
-								// Log a nice summary of the minification savings and the time it took.
-								const savings = htmlSize - minifiedHtmlSize;
-								const savingsStr =
-									savings < 1024
-										? `${savings}B`
-										: savings < 1048576
-											? `${(savings / 1024).toFixed(1)}kB`
-											: `${(savings / 1048576).toFixed(2)}MB`;
-								const time = timeEnd - timeStart;
-								const timeStr =
-									time < 1000
-										? `${Math.round(time)}ms`
-										: `${(time / 1000).toFixed(2)}s`;
-								logger.info(
-									logLineAssetPath +
-										styleText("dim", `(-${savingsStr}) (+${timeStr})`),
-								);
 							});
 						}
-					}
 
 					// We use a quadruple of the available parallelism here, even if we don't actually run the tasks in different threads or anything.
 					// The available parallelism is a good indicator of machine capabilities, and the multiplier gives a good balance of speed and resource usage.
@@ -189,15 +137,6 @@ export default function htmlMinifier(
 					await Promise.all(executingTasks);
 				}
 
-				const totalTimeEnd = performance.now(); // --- TIMED BLOCK END ---
-
-				// Log how long processing all assets took.
-				const totalTime = totalTimeEnd - totalTimeStart;
-				const totalTimeStr =
-					totalTime < 1000
-						? `${Math.round(totalTime)}ms`
-						: `${(totalTime / 1000).toFixed(2)}s`;
-				logger.info(styleText("green", `✓ Completed in ${totalTimeStr}.`));
 			},
 		},
 	};
