@@ -3,11 +3,44 @@ import { availableParallelism as getAvailableParallelism } from "node:os";
 import { relative as getRelativePath } from "node:path";
 import { fileURLToPath } from "node:url";
 import { styleText } from "node:util";
+import { Worker } from "node:worker_threads";
 import type { AstroIntegration } from "astro";
-import {
-	type MinifierOptions as HTMLMinifierOptions,
-	minify as minifyHtml,
-} from "html-minifier-next";
+import { type MinifierOptions, minify as minifyHtml } from "html-minifier-next";
+
+export interface HTMLMinifierOptions extends MinifierOptions {
+	/**
+	 * Option specific to `astro-html-minifier-next` used to specify the maximum
+	 * number of worker threads to spawn when minifying files.
+	 * When set to `0`, `astro-html-minifier-next` will not create any worker
+	 * threads and will do the minification in the main thread.
+	 *
+	 * Note: If unable to do a structured clone of the `html-minifier-next`
+	 * options according to the
+	 * [HTML structured clone
+	 * algorithm](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm),
+	 * `astro-html-minifier-next` will do the minification on the main
+	 * thread, even if this option is not set to `0`.
+	 *
+	 * @default `Math.max(1, os.availableParallelism() - 1)`
+	 */
+	maxWorkers?: number;
+}
+
+/**
+ * Check if a value can be transferred to a worker.
+ * @param {*} value
+ * @returns {boolean}
+ */
+function isTransferable(value: unknown): boolean {
+	try {
+		// Attempt to do a structured clone of the value.
+		// If it succeeds, it should be transferable to a worker.
+		structuredClone(value);
+		return true;
+	} catch {
+		return false;
+	}
+}
 
 /**
  * An Astro integration that minifies HTML assets using
@@ -29,100 +62,132 @@ export default function htmlMinifier(
 
 				const totalTimeStart = performance.now(); // --- TIMED BLOCK START ---
 
-				// TODO: Use workers?
-				const tasks: (() => Promise<void>)[] = [];
-				const controller = new AbortController();
-				const signal = controller.signal;
-				const distPath = fileURLToPath(distUrl);
-				const logLineArrow = styleText("green", "▶");
-				for (const assetUrls of assets.values()) {
-					for (const assetUrl of assetUrls) {
-						const assetPath = fileURLToPath(assetUrl);
-						if (!assetPath.toLowerCase().endsWith(".html")) {
-							continue;
+				const availableParallelism = getAvailableParallelism();
+				const {
+					maxWorkers = Math.max(1, availableParallelism - 1),
+					...minifyHtmlOptions
+				} = options;
+				if (maxWorkers > 0 && isTransferable(minifyHtmlOptions)) {
+					// We can use worker threads! Speed!
+
+					const pool: Worker[] = [];
+					const idlePool: Worker[] = [];
+					const queue = [];
+
+					const getAvailableWorker = () => {
+						// has idle one?
+						if (idlePool.length) {
+							return idlePool.shift();
 						}
 
-						const relativeAssetPath = getRelativePath(distPath, assetPath);
-						const logLineAssetPath = `  ${logLineArrow} /${relativeAssetPath} `;
-						tasks.push(async () => {
-							const timeStart = performance.now(); // --- TIMED BLOCK START ---
+						// can spawn more?
+						if (pool.length < maxWorkers) {
+							const worker = new Worker('./worker.js');
 
-							const html = await readFile(assetPath, {
-								encoding: "utf8",
-								signal,
-							});
-							const minifiedHtml = await minifyHtml(html, options);
+							worker.on('message', ({ result, error }) => {
+								if (result) {
 
-							const htmlSize = Buffer.byteLength(html);
-							const minifiedHtmlSize = Buffer.byteLength(minifiedHtml);
-							if (minifiedHtmlSize >= htmlSize) {
-								// No actual file size savings, so we skip writing the file or logging anything.
-								return;
+								}
+							})
+						}
+					}
+				} else {
+					// We can't use worker threads... Slow...
+
+					const tasks: (() => Promise<void>)[] = [];
+					const controller = new AbortController();
+					const signal = controller.signal;
+					const distPath = fileURLToPath(distUrl);
+					const logLineArrow = styleText("green", "▶");
+					for (const assetUrls of assets.values()) {
+						for (const assetUrl of assetUrls) {
+							const assetPath = fileURLToPath(assetUrl);
+							if (!assetPath.toLowerCase().endsWith(".html")) {
+								continue;
 							}
 
-							await writeFile(assetPath, minifiedHtml, {
-								encoding: "utf8",
-								signal,
+							const relativeAssetPath = getRelativePath(distPath, assetPath);
+							const logLineAssetPath = `  ${logLineArrow} /${relativeAssetPath} `;
+							tasks.push(async () => {
+								const timeStart = performance.now(); // --- TIMED BLOCK START ---
+
+								const html = await readFile(assetPath, {
+									encoding: "utf8",
+									signal,
+								});
+								const minifiedHtml = await minifyHtml(html, minifyHtmlOptions);
+
+								const htmlSize = Buffer.byteLength(html);
+								const minifiedHtmlSize = Buffer.byteLength(minifiedHtml);
+								if (minifiedHtmlSize >= htmlSize) {
+									// No actual file size savings, so we skip writing the file or logging anything.
+									return;
+								}
+
+								await writeFile(assetPath, minifiedHtml, {
+									encoding: "utf8",
+									signal,
+								});
+
+								const timeEnd = performance.now(); // --- TIMED BLOCK END ---
+
+								// Log a nice summary of the minification savings and the time it took.
+								const savings = htmlSize - minifiedHtmlSize;
+								const savingsStr =
+									savings < 1024
+										? `${savings}B`
+										: savings < 1048576
+											? `${(savings / 1024).toFixed(1)}kB`
+											: `${(savings / 1048576).toFixed(2)}MB`;
+								const time = timeEnd - timeStart;
+								const timeStr =
+									time < 1000
+										? `${Math.round(time)}ms`
+										: `${(time / 1000).toFixed(2)}s`;
+								logger.info(
+									logLineAssetPath +
+										styleText("dim", `(-${savingsStr}) (+${timeStr})`),
+								);
+							});
+						}
+					}
+
+					// We use a quadruple of the available parallelism here, even if we don't actually run the tasks in different threads or anything.
+					// The available parallelism is a good indicator of machine capabilities, and the multiplier gives a good balance of speed and resource usage.
+					const maxExecutingTasksSize = availableParallelism * 4;
+
+					// This holds the current batch of promises that are waiting to fulfill.
+					const executingTasks = new Set<Promise<void>>();
+
+					// Batch the tasks to avoid minifying too many files at once, which could lead to memory and performance issues.
+					for (const task of tasks) {
+						const taskPromise = task()
+							.then(() => {
+								executingTasks.delete(taskPromise);
+							})
+							.catch((e) => {
+								if (!signal.aborted) {
+									controller.abort(e);
+								}
+								throw e;
 							});
 
-							const timeEnd = performance.now(); // --- TIMED BLOCK END ---
+						executingTasks.add(taskPromise);
 
-							// Log a nice summary of the minification savings and the time it took.
-							const savings = htmlSize - minifiedHtmlSize;
-							const savingsStr =
-								savings < 1000
-									? `${savings}B`
-									: savings < 1000000
-										? `${(savings / 1000).toFixed(1)}kB`
-										: `${(savings / 1000000).toFixed(2)}MB`;
-							const time = timeEnd - timeStart;
-							const timeStr =
-								time < 1000
-									? `${Math.round(time)}ms`
-									: `${(time / 1000).toFixed(2)}s`;
-							logger.info(
-								logLineAssetPath +
-									styleText("dim", `(-${savingsStr}) (+${timeStr})`),
-							);
-						});
+						if (executingTasks.size >= maxExecutingTasksSize) {
+							// If the amount of executing tasks reaches the limit, we wait until the one of them finishes,
+							// and therefore gets deleted from the list, before continuing with the next task.
+							await Promise.race(executingTasks);
+						}
+
+						if (signal.aborted) {
+							throw signal.reason;
+						}
 					}
+
+					// Wait for any remaining tasks to finish.
+					await Promise.all(executingTasks);
 				}
-
-				// We retrieve the available parallelism from the OS, even if we don't actually run the tasks in different threads.
-				// It's just used as an indicator of machine capabilities and usually a good value for batching.
-				const maxExecutingTasksSize = getAvailableParallelism();
-
-				// This holds the current batch of promises that are waiting to fulfill.
-				const executingTasks = new Set<Promise<void>>();
-
-				// Batch the tasks to avoid minifying too many files at once, which could lead to memory and performance issues.
-				for (const task of tasks) {
-					const taskPromise = task()
-						.then(() => {
-							executingTasks.delete(taskPromise);
-						})
-						.catch((e) => {
-							if (!signal.aborted) {
-								controller.abort(e);
-							}
-							throw e;
-						});
-
-					executingTasks.add(taskPromise);
-
-					if (executingTasks.size >= maxExecutingTasksSize) {
-						// If the amount of executing tasks reaches the limit, we wait until the one of them finishes,
-						// and therefore gets deleted from the list, before continuing with the next task.
-						await Promise.race(executingTasks);
-					}
-
-					if (signal.aborted) {
-						throw signal.reason;
-					}
-				}
-
-				// Wait for any remaining tasks to finish.
-				await Promise.all(executingTasks);
 
 				const totalTimeEnd = performance.now(); // --- TIMED BLOCK END ---
 
