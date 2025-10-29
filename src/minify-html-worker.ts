@@ -1,10 +1,14 @@
 import { isMainThread, parentPort } from "node:worker_threads";
-import { minify as minifyHTML, type MinifierOptions as MinifyHTMLOptions } from "html-minifier-next";
+import {
+	type MinifierOptions as MinifyHTMLOptions,
+	minify as minifyHTML,
+} from "html-minifier-next";
 
 if (isMainThread) {
 	throw new Error("This file is meant to be run as a worker thread.");
 }
 
+// biome-ignore-start lint/style/noNonNullAssertion: I can assume `parentPort` is not null.
 parentPort!.on(
 	"message",
 	async ({
@@ -22,3 +26,4 @@ parentPort!.on(
 		}
 	},
 );
+// biome-ignore-end lint/style/noNonNullAssertion: See start.
