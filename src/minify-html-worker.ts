@@ -19,8 +19,9 @@ parentPort!.on(
 		minifyHTMLOptions: MinifyHTMLOptions;
 	}) => {
 		try {
-			const result = await minifyHTML(html, minifyHTMLOptions);
-			parentPort!.postMessage({ result });
+			parentPort!.postMessage({
+				result: await minifyHTML(html, minifyHTMLOptions),
+			});
 		} catch (error) {
 			parentPort!.postMessage({ error });
 		}

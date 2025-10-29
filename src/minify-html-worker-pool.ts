@@ -15,7 +15,7 @@ interface WorkerWithPromise extends Worker {
 	_currentReject?: (reason?: unknown) => void;
 }
 
-export class MinifyHtmlWorkerPool {
+export class MinifyHTMLWorkerPool {
 	protected maxWorkers: number;
 
 	protected workerUrl: URL;

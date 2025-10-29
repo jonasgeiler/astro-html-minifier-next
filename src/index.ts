@@ -8,7 +8,7 @@ import {
 	type MinifierOptions as MinifyHTMLOptions,
 	minify as minifyHTML,
 } from "html-minifier-next";
-import { MinifyHtmlWorkerPool } from "./minify-html-worker-pool.js";
+import { MinifyHTMLWorkerPool } from "./minify-html-worker-pool.js";
 
 export interface HTMLMinifierOptions extends MinifyHTMLOptions {
 	/**
@@ -71,9 +71,9 @@ export default function htmlMinifier(
 					...minifyHtmlOptions
 				} = options;
 
-				let workerPool: MinifyHtmlWorkerPool | undefined;
+				let workerPool: MinifyHTMLWorkerPool | undefined;
 				if (maxWorkers > 0 && isTransferable(minifyHtmlOptions)) {
-					workerPool = new MinifyHtmlWorkerPool(maxWorkers);
+					workerPool = new MinifyHTMLWorkerPool(maxWorkers);
 				}
 
 				const tasks: (() => Promise<void>)[] = [];
