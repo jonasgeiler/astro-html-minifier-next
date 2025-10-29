@@ -1,6 +1,6 @@
 import { type DebugLoggerFunction, debuglog } from "node:util";
 import { Worker } from "node:worker_threads";
-import type { MinifierOptions as HtmlMinifierNextOptions } from "html-minifier-next";
+import type { MinifierOptions as MinifyHTMLOptions } from "html-minifier-next";
 
 let debug: DebugLoggerFunction = debuglog(
 	"astro-html-minifier-next",
@@ -119,16 +119,16 @@ export class MinifyHtmlWorkerPool {
 		}
 	}
 
-	public async minifyHtml(
+	public async minifyHTML(
 		html: string,
-		minifyHtmlOptions: HtmlMinifierNextOptions,
+		minifyHTMLOptions: MinifyHTMLOptions,
 	): Promise<string> {
 		const worker = await this.getAvailableWorker();
 
 		return new Promise<string>((resolve, reject) => {
 			worker._currentResolve = resolve;
 			worker._currentReject = reject;
-			worker.postMessage({ html, minifyHtmlOptions });
+			worker.postMessage({ html, minifyHTMLOptions });
 		});
 	}
 

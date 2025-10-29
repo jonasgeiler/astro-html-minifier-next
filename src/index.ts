@@ -5,12 +5,12 @@ import { fileURLToPath } from "node:url";
 import { styleText } from "node:util";
 import type { AstroIntegration } from "astro";
 import {
-	type MinifierOptions as HtmlMinifierNextOptions,
-	minify as minifyHtml,
+	type MinifierOptions as MinifyHTMLOptions,
+	minify as minifyHTML,
 } from "html-minifier-next";
 import { MinifyHtmlWorkerPool } from "./minify-html-worker-pool.js";
 
-export interface HTMLMinifierOptions extends HtmlMinifierNextOptions {
+export interface HTMLMinifierOptions extends MinifyHTMLOptions {
 	/**
 	 * Option specific to `astro-html-minifier-next` used to specify the maximum
 	 * number of worker threads to spawn when minifying files.
@@ -100,8 +100,8 @@ export default function htmlMinifier(
 								signal,
 							});
 							const minifiedHtml = workerPool
-								? await workerPool.minifyHtml(html, minifyHtmlOptions) // TODO: Transfer, not copy
-								: await minifyHtml(html, minifyHtmlOptions);
+								? await workerPool.minifyHTML(html, minifyHtmlOptions) // TODO: Transfer, not copy
+								: await minifyHTML(html, minifyHtmlOptions);
 
 							const htmlSize = Buffer.byteLength(html);
 							const minifiedHtmlSize = Buffer.byteLength(minifiedHtml);
