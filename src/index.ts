@@ -1,12 +1,12 @@
 import { readFile, writeFile } from "node:fs/promises";
+import { availableParallelism as getAvailableParallelism } from "node:os";
+import { relative as getRelativePath } from "node:path";
 import { fileURLToPath } from "node:url";
+import { styleText } from "node:util";
 import type { AstroIntegration } from "astro";
+import type { MinifierOptions as HtmlMinifierNextOptions } from "html-minifier-next";
 import { minify as minifyHtml } from "html-minifier-next";
 import { MinifyHtmlWorkerPool } from "./minify-html-worker-pool.js";
-import { availableParallelism as getAvailableParallelism } from "node:os";
-import { styleText } from "node:util";
-import { relative as getRelativePath } from "node:path";
-import type { MinifierOptions as HtmlMinifierNextOptions } from "html-minifier-next";
 
 export interface AstroHtmlMinifierNextOptions extends HtmlMinifierNextOptions {
 	/**
@@ -51,7 +51,9 @@ function isTransferable(value: unknown): boolean {
  *   [html-minifier-next](https://www.npmjs.com/package/html-minifier-next).
  * @returns The Astro integration.
  */
-export default function htmlMinifier(options: AstroHtmlMinifierNextOptions): AstroIntegration {
+export default function htmlMinifier(
+	options: AstroHtmlMinifierNextOptions,
+): AstroIntegration {
 	// API Reference: https://docs.astro.build/en/reference/integrations-reference/
 	return {
 		name: "astro-html-minifier-next",
@@ -69,7 +71,7 @@ export default function htmlMinifier(options: AstroHtmlMinifierNextOptions): Ast
 
 				let workerPool: MinifyHtmlWorkerPool | undefined;
 				if (maxWorkers > 0 && isTransferable(minifyHtmlOptions)) {
-					workerPool = new MinifyHtmlWorkerPool(maxWorkers)
+					workerPool = new MinifyHtmlWorkerPool(maxWorkers);
 				}
 
 				const tasks: (() => Promise<void>)[] = [];
@@ -128,7 +130,7 @@ export default function htmlMinifier(options: AstroHtmlMinifierNextOptions): Ast
 									: `${(time / 1000).toFixed(2)}s`;
 							logger.info(
 								logLineAssetPath +
-								styleText("dim", `(-${savingsStr}) (+${timeStr})`),
+									styleText("dim", `(-${savingsStr}) (+${timeStr})`),
 							);
 						});
 					}

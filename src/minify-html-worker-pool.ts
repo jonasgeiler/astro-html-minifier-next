@@ -1,11 +1,14 @@
+import { type DebugLoggerFunction, debuglog } from "node:util";
 import { Worker } from "node:worker_threads";
-import { debuglog, type DebugLoggerFunction } from 'node:util';
 import type { MinifierOptions as HtmlMinifierNextOptions } from "html-minifier-next";
 
-let debug: DebugLoggerFunction = debuglog('astro-html-minifier-next', (optimizedDebug) => {
-	// Replace with a logging function that optimizes out testing if the section is enabled.
-	debug = optimizedDebug;
-});
+let debug: DebugLoggerFunction = debuglog(
+	"astro-html-minifier-next",
+	(optimizedDebug) => {
+		// Replace with a logging function that optimizes out testing if the section is enabled.
+		debug = optimizedDebug;
+	},
+);
 
 interface WorkerWithPromise extends Worker {
 	_currentResolve?: (value: string) => void;
@@ -23,7 +26,7 @@ export class MinifyHtmlWorkerPool {
 	constructor(maxWorkers: number) {
 		this.maxWorkers = maxWorkers;
 
-		this.workerUrl = new URL('./minify-html-worker.js', import.meta.url);
+		this.workerUrl = new URL("./minify-html-worker.js", import.meta.url);
 		this.pool = new Set();
 		this.idle = [];
 		this.queue = [];
@@ -42,19 +45,22 @@ export class MinifyHtmlWorkerPool {
 		if (this.pool.size < this.maxWorkers) {
 			const worker = new Worker(this.workerUrl) as WorkerWithPromise;
 
-			worker.on("message", async (message: { result: string } | { error?: unknown }) => {
-				debug("worker '%s' sent a message: %O", worker, message);
+			worker.on(
+				"message",
+				async (message: { result: string } | { error?: unknown }) => {
+					debug("worker '%s' sent a message: %O", worker, message);
 
-				if ('result' in message) {
-					worker._currentResolve?.(message.result);
-				} else {
-					worker._currentReject?.(message.error);
-				}
-				worker._currentResolve = undefined;
-				worker._currentReject = undefined;
+					if ("result" in message) {
+						worker._currentResolve?.(message.result);
+					} else {
+						worker._currentReject?.(message.error);
+					}
+					worker._currentResolve = undefined;
+					worker._currentReject = undefined;
 
-				this.releaseWorker(worker);
-			})
+					this.releaseWorker(worker);
+				},
+			);
 
 			worker.on("error", (error) => {
 				debug("worker '%s' encountered an error: %O", worker, error);
@@ -70,7 +76,9 @@ export class MinifyHtmlWorkerPool {
 				this.removeWorker(worker);
 
 				if (exitCode !== 0) {
-					worker._currentReject?.(new Error(`Worker failed with exit code ${exitCode}.`));
+					worker._currentReject?.(
+						new Error(`Worker failed with exit code ${exitCode}.`),
+					);
 					worker._currentResolve = undefined;
 					worker._currentReject = undefined;
 				}
@@ -81,7 +89,7 @@ export class MinifyHtmlWorkerPool {
 		}
 
 		// Otherwise, wait for a worker to free up.
-		return new Promise<Worker>(resolve => {
+		return new Promise<Worker>((resolve) => {
 			// When a worker frees up, they will check the queue and resolve this promise.
 			this.queue.push(resolve);
 		});
@@ -111,7 +119,10 @@ export class MinifyHtmlWorkerPool {
 		}
 	}
 
-	public async minifyHtml(html: string, minifyHtmlOptions: HtmlMinifierNextOptions): Promise<string> {
+	public async minifyHtml(
+		html: string,
+		minifyHtmlOptions: HtmlMinifierNextOptions,
+	): Promise<string> {
 		const worker = await this.getAvailableWorker();
 
 		return new Promise<string>((resolve, reject) => {

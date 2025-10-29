@@ -1,9 +1,6 @@
-import {
-	parentPort,
-	isMainThread,
-} from "node:worker_threads";
-import { minify as minifyHtml } from "html-minifier-next";
+import { isMainThread, parentPort } from "node:worker_threads";
 import type { MinifierOptions as HtmlMinifierNextOptions } from "html-minifier-next";
+import { minify as minifyHtml } from "html-minifier-next";
 
 if (isMainThread) {
 	throw new Error("This file is meant to be run as a worker thread.");
@@ -11,7 +8,13 @@ if (isMainThread) {
 
 parentPort!.on(
 	"message",
-	async ({ html, minifyHtmlOptions }: { html: string; minifyHtmlOptions: HtmlMinifierNextOptions }) => {
+	async ({
+		html,
+		minifyHtmlOptions,
+	}: {
+		html: string;
+		minifyHtmlOptions: HtmlMinifierNextOptions;
+	}) => {
 		try {
 			const result = await minifyHtml(html, minifyHtmlOptions);
 			parentPort!.postMessage({ result });

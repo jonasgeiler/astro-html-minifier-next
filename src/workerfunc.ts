@@ -1,10 +1,13 @@
+import { readFile, writeFile } from "node:fs/promises";
 import {
 	type MinifierOptions as MinifyHtmlOptions,
 	minify as minifyHtml,
 } from "html-minifier-next";
-import { readFile, writeFile } from "node:fs/promises";
 
-export default async function minifyHtmlFile(htmlFile: string, minifyHtmlOptions: MinifyHtmlOptions) {
+export default async function minifyHtmlFile(
+	htmlFile: string,
+	minifyHtmlOptions: MinifyHtmlOptions,
+) {
 	const html = await readFile(htmlFile, {
 		encoding: "utf8",
 		// TODO: Use signal?
