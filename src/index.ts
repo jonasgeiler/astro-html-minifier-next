@@ -58,7 +58,6 @@ export default function htmlMinifier(
 		name: "astro-html-minifier-next",
 		hooks: {
 			"astro:build:done": async ({ logger, dir: distUrl, assets }) => {
-
 				const availableParallelism = getAvailableParallelism();
 				const {
 					maxWorkers = Math.max(1, availableParallelism - 1),
@@ -78,65 +77,63 @@ export default function htmlMinifier(
 							continue;
 						}
 
-							tasks.push(async () => {
-
-								const html = await readFile(assetPath, {
-									encoding: "utf8",
-									signal,
-								});
-								const minifiedHtml = await minifyHtml(html, minifyHtmlOptions);
-
-								const htmlSize = Buffer.byteLength(html);
-								const minifiedHtmlSize = Buffer.byteLength(minifiedHtml);
-								if (minifiedHtmlSize >= htmlSize) {
-									// No actual file size savings, so we skip writing the file or logging anything.
-									return;
-								}
-
-								await writeFile(assetPath, minifiedHtml, {
-									encoding: "utf8",
-									signal,
-								});
+						tasks.push(async () => {
+							const html = await readFile(assetPath, {
+								encoding: "utf8",
+								signal,
 							});
-						}
+							const minifiedHtml = await minifyHtml(html, minifyHtmlOptions);
 
-					// We use a quadruple of the available parallelism here, even if we don't actually run the tasks in different threads or anything.
-					// The available parallelism is a good indicator of machine capabilities, and the multiplier gives a good balance of speed and resource usage.
-					const maxExecutingTasksSize = availableParallelism * 4;
+							const htmlSize = Buffer.byteLength(html);
+							const minifiedHtmlSize = Buffer.byteLength(minifiedHtml);
+							if (minifiedHtmlSize >= htmlSize) {
+								// No actual file size savings, so we skip writing the file or logging anything.
+								return;
+							}
 
-					// This holds the current batch of promises that are waiting to fulfill.
-					const executingTasks = new Set<Promise<void>>();
-
-					// Batch the tasks to avoid minifying too many files at once, which could lead to memory and performance issues.
-					for (const task of tasks) {
-						const taskPromise = task()
-							.then(() => {
-								executingTasks.delete(taskPromise);
-							})
-							.catch((e) => {
-								if (!signal.aborted) {
-									controller.abort(e);
-								}
-								throw e;
+							await writeFile(assetPath, minifiedHtml, {
+								encoding: "utf8",
+								signal,
 							});
-
-						executingTasks.add(taskPromise);
-
-						if (executingTasks.size >= maxExecutingTasksSize) {
-							// If the amount of executing tasks reaches the limit, we wait until the one of them finishes,
-							// and therefore gets deleted from the list, before continuing with the next task.
-							await Promise.race(executingTasks);
-						}
-
-						if (signal.aborted) {
-							throw signal.reason;
-						}
+						});
 					}
-
-					// Wait for any remaining tasks to finish.
-					await Promise.all(executingTasks);
 				}
 
+				// We use a quadruple of the available parallelism here, even if we don't actually run the tasks in different threads or anything.
+				// The available parallelism is a good indicator of machine capabilities, and the multiplier gives a good balance of speed and resource usage.
+				const maxExecutingTasksSize = availableParallelism * 4;
+
+				// This holds the current batch of promises that are waiting to fulfill.
+				const executingTasks = new Set<Promise<void>>();
+
+				// Batch the tasks to avoid minifying too many files at once, which could lead to memory and performance issues.
+				for (const task of tasks) {
+					const taskPromise = task()
+						.then(() => {
+							executingTasks.delete(taskPromise);
+						})
+						.catch((e) => {
+							if (!signal.aborted) {
+								controller.abort(e);
+							}
+							throw e;
+						});
+
+					executingTasks.add(taskPromise);
+
+					if (executingTasks.size >= maxExecutingTasksSize) {
+						// If the amount of executing tasks reaches the limit, we wait until the one of them finishes,
+						// and therefore gets deleted from the list, before continuing with the next task.
+						await Promise.race(executingTasks);
+					}
+
+					if (signal.aborted) {
+						throw signal.reason;
+					}
+				}
+
+				// Wait for any remaining tasks to finish.
+				await Promise.all(executingTasks);
 			},
 		},
 	};
