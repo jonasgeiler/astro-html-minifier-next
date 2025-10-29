@@ -5,7 +5,7 @@ import {
 } from "html-minifier-next";
 
 if (isMainThread) {
-	throw new Error("This file is meant to be run as a worker thread.");
+	throw new Error("Not a worker thread.");
 }
 
 // biome-ignore-start lint/style/noNonNullAssertion: I can assume `parentPort` is not null.
