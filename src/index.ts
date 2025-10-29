@@ -1,13 +1,14 @@
 import { readFile, writeFile } from "node:fs/promises";
-import { availableParallelism as getAvailableParallelism } from "node:os";
-import { relative as getRelativePath } from "node:path";
 import { fileURLToPath } from "node:url";
-import { styleText } from "node:util";
-import { Worker } from "node:worker_threads";
 import type { AstroIntegration } from "astro";
-import { type MinifierOptions, minify as minifyHtml } from "html-minifier-next";
+import { minify as minifyHtml } from "html-minifier-next";
+import { MinifyHtmlWorkerPool } from "./minify-html-worker-pool.js";
+import { availableParallelism as getAvailableParallelism } from "node:os";
+import { styleText } from "node:util";
+import { relative as getRelativePath } from "node:path";
+import type { MinifierOptions as HtmlMinifierNextOptions } from "html-minifier-next";
 
-export interface HTMLMinifierOptions extends MinifierOptions {
+export interface AstroHtmlMinifierNextOptions extends HtmlMinifierNextOptions {
 	/**
 	 * Option specific to `astro-html-minifier-next` used to specify the maximum
 	 * number of worker threads to spawn when minifying files.
@@ -50,26 +51,34 @@ function isTransferable(value: unknown): boolean {
  *   [html-minifier-next](https://www.npmjs.com/package/html-minifier-next).
  * @returns The Astro integration.
  */
-export default function htmlMinifier(
-	options: HTMLMinifierOptions,
-): AstroIntegration {
+export default function htmlMinifier(options: AstroHtmlMinifierNextOptions): AstroIntegration {
 	// API Reference: https://docs.astro.build/en/reference/integrations-reference/
 	return {
 		name: "astro-html-minifier-next",
 		hooks: {
-			"astro:build:done": async ({ logger, dir: distUrl, assets }) => {
+			"astro:build:done": async ({ assets, dir: distUrl, logger }) => {
+				logger.info(styleText(["bgGreen", "black"], " minifying html assets "));
+
+				const totalTimeStart = performance.now(); // --- TIMED BLOCK START ---
+
 				const availableParallelism = getAvailableParallelism();
 				const {
 					maxWorkers = Math.max(1, availableParallelism - 1),
 					...minifyHtmlOptions
 				} = options;
-				const useWorkers = maxWorkers > 0 && isTransferable(minifyHtmlOptions);
+
+				let workerPool: MinifyHtmlWorkerPool | undefined;
+				if (maxWorkers > 0 && isTransferable(minifyHtmlOptions)) {
+					workerPool = new MinifyHtmlWorkerPool(maxWorkers)
+				}
 
 				const tasks: (() => Promise<void>)[] = [];
 
 				const controller = new AbortController();
 				const signal = controller.signal;
 
+				const distPath = fileURLToPath(distUrl);
+				const logLineArrow = styleText("green", "▶");
 				for (const assetUrls of assets.values()) {
 					for (const assetUrl of assetUrls) {
 						const assetPath = fileURLToPath(assetUrl);
@@ -77,12 +86,18 @@ export default function htmlMinifier(
 							continue;
 						}
 
+						const relativeAssetPath = getRelativePath(distPath, assetPath);
+						const logLineAssetPath = `  ${logLineArrow} /${relativeAssetPath} `;
 						tasks.push(async () => {
+							const timeStart = performance.now(); // --- TIMED BLOCK START ---
+
 							const html = await readFile(assetPath, {
 								encoding: "utf8",
 								signal,
 							});
-							const minifiedHtml = await minifyHtml(html, minifyHtmlOptions);
+							const minifiedHtml = workerPool
+								? await workerPool.minifyHtml(html, minifyHtmlOptions) // TODO: Transfer, not copy
+								: await minifyHtml(html, minifyHtmlOptions);
 
 							const htmlSize = Buffer.byteLength(html);
 							const minifiedHtmlSize = Buffer.byteLength(minifiedHtml);
@@ -95,6 +110,26 @@ export default function htmlMinifier(
 								encoding: "utf8",
 								signal,
 							});
+
+							const timeEnd = performance.now(); // --- TIMED BLOCK END ---
+
+							// Log a nice summary of the minification savings and the time it took.
+							const savings = htmlSize - minifiedHtmlSize;
+							const savingsStr =
+								savings < 1024
+									? `${savings}B`
+									: savings < 1048576
+										? `${(savings / 1024).toFixed(1)}kB`
+										: `${(savings / 1048576).toFixed(2)}MB`;
+							const time = timeEnd - timeStart;
+							const timeStr =
+								time < 1000
+									? `${Math.round(time)}ms`
+									: `${(time / 1000).toFixed(2)}s`;
+							logger.info(
+								logLineAssetPath +
+								styleText("dim", `(-${savingsStr}) (+${timeStr})`),
+							);
 						});
 					}
 				}
@@ -134,6 +169,16 @@ export default function htmlMinifier(
 
 				// Wait for any remaining tasks to finish.
 				await Promise.all(executingTasks);
+
+				const totalTimeEnd = performance.now(); // --- TIMED BLOCK END ---
+
+				// Log how long processing all assets took.
+				const totalTime = totalTimeEnd - totalTimeStart;
+				const totalTimeStr =
+					totalTime < 1000
+						? `${Math.round(totalTime)}ms`
+						: `${(totalTime / 1000).toFixed(2)}s`;
+				logger.info(styleText("green", `✓ Completed in ${totalTimeStr}.`));
 			},
 		},
 	};
