@@ -4,11 +4,13 @@ import { relative as getRelativePath } from "node:path";
 import { fileURLToPath } from "node:url";
 import { styleText } from "node:util";
 import type { AstroIntegration } from "astro";
-import type { MinifierOptions as HtmlMinifierNextOptions } from "html-minifier-next";
-import { minify as minifyHtml } from "html-minifier-next";
+import {
+	type MinifierOptions as HtmlMinifierNextOptions,
+	minify as minifyHtml,
+} from "html-minifier-next";
 import { MinifyHtmlWorkerPool } from "./minify-html-worker-pool.js";
 
-export interface AstroHtmlMinifierNextOptions extends HtmlMinifierNextOptions {
+export interface HTMLMinifierOptions extends HtmlMinifierNextOptions {
 	/**
 	 * Option specific to `astro-html-minifier-next` used to specify the maximum
 	 * number of worker threads to spawn when minifying files.
@@ -52,13 +54,13 @@ function isTransferable(value: unknown): boolean {
  * @returns The Astro integration.
  */
 export default function htmlMinifier(
-	options: AstroHtmlMinifierNextOptions,
+	options: HTMLMinifierOptions,
 ): AstroIntegration {
 	// API Reference: https://docs.astro.build/en/reference/integrations-reference/
 	return {
 		name: "astro-html-minifier-next",
 		hooks: {
-			"astro:build:done": async ({ assets, dir: distUrl, logger }) => {
+			"astro:build:done": async ({ logger, dir: distUrl, assets }) => {
 				logger.info(styleText(["bgGreen", "black"], " minifying html assets "));
 
 				const totalTimeStart = performance.now(); // --- TIMED BLOCK START ---
