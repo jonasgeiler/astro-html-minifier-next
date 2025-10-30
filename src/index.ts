@@ -77,6 +77,8 @@ export default function htmlMinifier(
 				}
 
 				const tasks: (() => Promise<void>)[] = [];
+				let tasksTotal = 0;
+				let tasksDone = 0;
 
 				const controller = new AbortController();
 				const signal = controller.signal;
@@ -115,9 +117,14 @@ export default function htmlMinifier(
 									: `${(time / 1000).toFixed(2)}s`;
 							logger.info(
 								logLineAssetPath +
-									styleText("dim", `(-${savingsStr}) (+${timeStr})`),
+									styleText(
+										"dim",
+										`(-${savingsStr}) (+${timeStr}) (${++tasksDone}/${tasksTotal})`,
+									),
 							);
 						});
+
+						tasksTotal++;
 					}
 				}
 
