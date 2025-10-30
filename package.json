@@ -19,7 +19,7 @@
     "unsafe-fix": "biome check --unsafe --fix",
     "prebuild": "node --eval='require(`fs`).rmSync(`dist`,{recursive:true,force:true})'",
     "build": "tsc",
-    "version": "node --eval='const f=require(`fs`);const j=JSON.parse(f.readFileSync(`jsr.json`,`utf8`));j.version=process.env.npm_package_version||j.version;f.writeFileSync(`jsr.json`,JSON.stringify(j,null,2)+`\\n`);console.log(`Updated jsr.json for version`,j.version)' && git add jsr.json",
+    "version": "node --eval='const f=`jsr.json`,v=process.env.npm_package_version,s=require(`fs`);s.writeFileSync(f,JSON.stringify({...JSON.parse(s.readFileSync(f,`utf8`)),version:v},null,2)+`\\n`);console.log(`Updated ${f} for v${v}`)' && git add jsr.json",
     "prepack": "pnpm run build"
   },
   "engines": {
