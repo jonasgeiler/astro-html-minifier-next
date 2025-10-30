@@ -1,6 +1,6 @@
 {
   "name": "astro-html-minifier-next",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Astro integration for html-minifier-next",
   "homepage": "https://github.com/jonasgeiler/astro-html-minifier-next#readme",
   "bugs": "https://github.com/jonasgeiler/astro-html-minifier-next/issues",
