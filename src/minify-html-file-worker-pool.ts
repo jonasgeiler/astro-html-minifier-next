@@ -2,15 +2,15 @@ import { Worker } from "node:worker_threads";
 import type { MinifierOptions as MinifyHTMLOptions } from "html-minifier-next";
 import type { MinifyHTMLFileResult } from "./minify-html-file.js";
 
-interface WorkerWithPromise<T> extends Worker {
-	_currentResolve?: (value: T) => void;
-	_currentReject?: (reason?: unknown) => void;
+interface MinifyHTMLFileWorker extends Worker {
+	_currentResolve?: (result: MinifyHTMLFileResult) => void;
+	_currentReject?: (error: unknown) => void;
 }
 
 export type MinifyHTMLWorkerInput = string;
 export type MinifyHTMLWorkerOutput = MinifyHTMLFileResult | { error: unknown };
 
-export class MinifyHTMLWorkerPool {
+export class MinifyHTMLFileWorkerPool {
 	protected maxWorkers: number;
 	protected minifyHTMLOptions: MinifyHTMLOptions;
 
@@ -23,15 +23,13 @@ export class MinifyHTMLWorkerPool {
 		this.maxWorkers = maxWorkers;
 		this.minifyHTMLOptions = minifyHTMLOptions;
 
-		this.workerUrl = new URL("./minify-html-worker.js", import.meta.url);
+		this.workerUrl = new URL("./minify-html-file-worker.js", import.meta.url);
 		this.pool = new Set();
 		this.idle = [];
 		this.queue = [];
 	}
 
-	protected async getAvailableWorker(): Promise<
-		WorkerWithPromise<MinifyHTMLFileResult>
-	> {
+	protected async getAvailableWorker(): Promise<MinifyHTMLFileWorker> {
 		// If there is an idle worker, use it.
 		if (this.idle.length) {
 			const worker = this.idle.shift();
@@ -44,7 +42,7 @@ export class MinifyHTMLWorkerPool {
 		if (this.pool.size < this.maxWorkers) {
 			const worker = new Worker(this.workerUrl, {
 				workerData: this.minifyHTMLOptions,
-			}) as WorkerWithPromise<MinifyHTMLFileResult>;
+			}) as MinifyHTMLFileWorker;
 
 			worker.on("message", async (message: MinifyHTMLWorkerOutput) => {
 				if ("error" in message) {

@@ -7,7 +7,7 @@ import { minifyHTMLFile } from "./minify-html-file.js";
 import type {
 	MinifyHTMLWorkerInput,
 	MinifyHTMLWorkerOutput,
-} from "./minify-html-worker-pool.js";
+} from "./minify-html-file-worker-pool.js";
 
 if (isMainThread) {
 	throw new Error("Not a worker thread.");

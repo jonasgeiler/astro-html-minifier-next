@@ -5,7 +5,7 @@ import { styleText } from "node:util";
 import type { AstroIntegration } from "astro";
 import type { MinifierOptions as MinifyHTMLOptions } from "html-minifier-next";
 import { minifyHTMLFile } from "./minify-html-file.js";
-import { MinifyHTMLWorkerPool } from "./minify-html-worker-pool.js";
+import { MinifyHTMLFileWorkerPool } from "./minify-html-file-worker-pool.js";
 
 export interface HTMLMinifierOptions extends MinifyHTMLOptions {
 	/**
@@ -65,12 +65,15 @@ export default function htmlMinifier(
 				const availableParallelism = getAvailableParallelism();
 				const {
 					maxWorkers = Math.max(1, availableParallelism - 1),
-					...minifyHtmlOptions
+					...minifyHTMLOptions
 				} = options;
 
-				let workerPool: MinifyHTMLWorkerPool | undefined;
-				if (maxWorkers > 0 && isTransferable(minifyHtmlOptions)) {
-					workerPool = new MinifyHTMLWorkerPool(maxWorkers, minifyHtmlOptions);
+				let workerPool: MinifyHTMLFileWorkerPool | undefined;
+				if (maxWorkers > 0 && isTransferable(minifyHTMLOptions)) {
+					workerPool = new MinifyHTMLFileWorkerPool(
+						maxWorkers,
+						minifyHTMLOptions,
+					);
 				}
 
 				const tasks: (() => Promise<void>)[] = [];
@@ -92,7 +95,7 @@ export default function htmlMinifier(
 						tasks.push(async () => {
 							const { savings, time } = workerPool
 								? await workerPool.minifyHTMLFile(assetPath)
-								: await minifyHTMLFile(assetPath, minifyHtmlOptions, signal);
+								: await minifyHTMLFile(assetPath, minifyHTMLOptions, signal);
 							if (savings <= 0) {
 								// No savings, so we skip logging.
 								// TODO: Also log when it got bigger - Probably more informative for the user.
