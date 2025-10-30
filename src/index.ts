@@ -98,28 +98,29 @@ export default function htmlMinifier(
 							const { savings, time } = workerPool
 								? await workerPool.minifyHTMLFile(assetPath)
 								: await minifyHTMLFile(assetPath, minifyHTMLOptions, signal);
-							if (savings <= 0) {
-								// No savings, so we skip logging.
-								// TODO: Also log when it got bigger - Probably more informative for the user.
-								return;
-							}
 
 							// Log a nice summary of the minification savings and the time it took.
-							const savingsStr =
-								savings < 1024
-									? `${savings}B`
-									: savings < 1048576
-										? `${(savings / 1024).toFixed(1)}kB`
-										: `${(savings / 1048576).toFixed(2)}MB`;
-							const timeStr =
+							const savingsSign = savings > 0 ? "-" : "+";
+							const savingsAbs = Math.abs(savings);
+							const savingsWithUnit =
+								savingsAbs < 1024
+									? `${savingsAbs}B`
+									: savingsAbs < 1048576
+										? `${(savingsAbs / 1024).toFixed(1)}kB`
+										: `${(savingsAbs / 1048576).toFixed(2)}MB`;
+							const timeWithUnit =
 								time < 1000
 									? `${Math.round(time)}ms`
 									: `${(time / 1000).toFixed(2)}s`;
 							logger.info(
 								logLineAssetPath +
 									styleText(
+										savings <= 0 ? "yellow" : "dim",
+										`(${savingsSign}${savingsWithUnit}${savings <= 0 ? ", skipped" : ""}) `,
+									) +
+									styleText(
 										"dim",
-										`(-${savingsStr}) (+${timeStr}) (${++tasksDone}/${tasksTotal})`,
+										`(+${timeWithUnit}) (${++tasksDone}/${tasksTotal})`,
 									),
 							);
 						});
