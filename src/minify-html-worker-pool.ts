@@ -7,23 +7,21 @@ interface WorkerWithPromise<T> extends Worker {
 	_currentReject?: (reason?: unknown) => void;
 }
 
-export interface MinifyHTMLWorkerInput {
-	htmlFile: string;
-	minifyHTMLOptions: MinifyHTMLOptions;
-}
-
+export type MinifyHTMLWorkerInput = string;
 export type MinifyHTMLWorkerOutput = MinifyHTMLFileResult | { error: unknown };
 
 export class MinifyHTMLWorkerPool {
 	protected maxWorkers: number;
+	protected minifyHTMLOptions: MinifyHTMLOptions;
 
 	protected workerUrl: URL;
 	protected pool: Set<Worker>;
 	protected idle: Worker[];
 	protected queue: ((value: Worker) => void)[];
 
-	constructor(maxWorkers: number) {
+	constructor(maxWorkers: number, minifyHTMLOptions: MinifyHTMLOptions) {
 		this.maxWorkers = maxWorkers;
+		this.minifyHTMLOptions = minifyHTMLOptions;
 
 		this.workerUrl = new URL("./minify-html-worker.js", import.meta.url);
 		this.pool = new Set();
@@ -44,9 +42,9 @@ export class MinifyHTMLWorkerPool {
 
 		// If we can create a new worker, do so.
 		if (this.pool.size < this.maxWorkers) {
-			const worker = new Worker(
-				this.workerUrl,
-			) as WorkerWithPromise<MinifyHTMLFileResult>;
+			const worker = new Worker(this.workerUrl, {
+				workerData: this.minifyHTMLOptions,
+			}) as WorkerWithPromise<MinifyHTMLFileResult>;
 
 			worker.on("message", async (message: MinifyHTMLWorkerOutput) => {
 				if ("error" in message) {
@@ -112,7 +110,6 @@ export class MinifyHTMLWorkerPool {
 
 	public async minifyHTMLFile(
 		htmlFile: string,
-		minifyHTMLOptions: MinifyHTMLOptions,
 		// TODO: Signal?
 	): Promise<MinifyHTMLFileResult> {
 		const worker = await this.getAvailableWorker();
@@ -120,11 +117,7 @@ export class MinifyHTMLWorkerPool {
 		return new Promise<MinifyHTMLFileResult>((resolve, reject) => {
 			worker._currentResolve = resolve;
 			worker._currentReject = reject;
-			// TODO: Only transfer minifyHTMLOptions at initialization if possible.
-			worker.postMessage({
-				htmlFile,
-				minifyHTMLOptions,
-			} satisfies MinifyHTMLWorkerInput);
+			worker.postMessage(htmlFile satisfies MinifyHTMLWorkerInput);
 		});
 	}
 

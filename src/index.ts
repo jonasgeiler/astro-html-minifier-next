@@ -70,7 +70,7 @@ export default function htmlMinifier(
 
 				let workerPool: MinifyHTMLWorkerPool | undefined;
 				if (maxWorkers > 0 && isTransferable(minifyHtmlOptions)) {
-					workerPool = new MinifyHTMLWorkerPool(maxWorkers);
+					workerPool = new MinifyHTMLWorkerPool(maxWorkers, minifyHtmlOptions);
 				}
 
 				const tasks: (() => Promise<void>)[] = [];
@@ -91,7 +91,7 @@ export default function htmlMinifier(
 						const logLineAssetPath = `  ${logLineArrow} /${relativeAssetPath} `;
 						tasks.push(async () => {
 							const { savings, time } = workerPool
-								? await workerPool.minifyHTMLFile(assetPath, minifyHtmlOptions)
+								? await workerPool.minifyHTMLFile(assetPath)
 								: await minifyHTMLFile(assetPath, minifyHtmlOptions, signal);
 							if (savings <= 0) {
 								// No savings, so we skip logging.
