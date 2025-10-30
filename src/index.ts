@@ -90,16 +90,16 @@ export default function htmlMinifier(
 						const relativeAssetPath = getRelativePath(distPath, assetPath);
 						const logLineAssetPath = `  ${logLineArrow} /${relativeAssetPath} `;
 						tasks.push(async () => {
-							const result = workerPool
+							const { savings, time } = workerPool
 								? await workerPool.minifyHTMLFile(assetPath, minifyHtmlOptions)
 								: await minifyHTMLFile(assetPath, minifyHtmlOptions, signal);
-							if (!result) {
+							if (savings <= 0) {
 								// No savings, so we skip logging.
+								// TODO: Also log when it got bigger - Probably more informative for the user.
 								return;
 							}
 
 							// Log a nice summary of the minification savings and the time it took.
-							const { savings, time } = result;
 							const savingsStr =
 								savings < 1024
 									? `${savings}B`

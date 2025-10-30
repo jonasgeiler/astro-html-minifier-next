@@ -14,9 +14,12 @@ parentPort!.on(
 	"message",
 	async ({ htmlFile, minifyHTMLOptions }: MinifyHTMLWorkerInput) => {
 		try {
-			parentPort!.postMessage({
-				result: await minifyHTMLFile(htmlFile, minifyHTMLOptions),
-			} satisfies MinifyHTMLWorkerOutput);
+			parentPort!.postMessage(
+				(await minifyHTMLFile(
+					htmlFile,
+					minifyHTMLOptions,
+				)) satisfies MinifyHTMLWorkerOutput,
+			);
 		} catch (error) {
 			parentPort!.postMessage({ error } satisfies MinifyHTMLWorkerOutput);
 		}

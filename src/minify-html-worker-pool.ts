@@ -12,9 +12,7 @@ export interface MinifyHTMLWorkerInput {
 	minifyHTMLOptions: MinifyHTMLOptions;
 }
 
-export type MinifyHTMLWorkerOutput =
-	| { result: MinifyHTMLFileResult }
-	| { error?: unknown };
+export type MinifyHTMLWorkerOutput = MinifyHTMLFileResult | { error: unknown };
 
 export class MinifyHTMLWorkerPool {
 	protected maxWorkers: number;
@@ -51,10 +49,10 @@ export class MinifyHTMLWorkerPool {
 			) as WorkerWithPromise<MinifyHTMLFileResult>;
 
 			worker.on("message", async (message: MinifyHTMLWorkerOutput) => {
-				if ("result" in message) {
-					worker._currentResolve?.(message.result);
-				} else {
+				if ("error" in message) {
 					worker._currentReject?.(message.error);
+				} else {
+					worker._currentResolve?.(message);
 				}
 				worker._currentResolve = worker._currentReject = undefined;
 

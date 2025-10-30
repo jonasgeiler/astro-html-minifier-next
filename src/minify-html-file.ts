@@ -4,12 +4,10 @@ import {
 	minify as minifyHTML,
 } from "html-minifier-next";
 
-export type MinifyHTMLFileResult =
-	| {
-			savings: number;
-			time: number;
-	  }
-	| false;
+export interface MinifyHTMLFileResult {
+	savings: number;
+	time: number;
+}
 
 export async function minifyHTMLFile(
 	htmlFile: string,
@@ -25,15 +23,13 @@ export async function minifyHTMLFile(
 	const minifiedHTML = await minifyHTML(html, minifyHTMLOptions);
 
 	const savings = Buffer.byteLength(html) - Buffer.byteLength(minifiedHTML);
-	if (savings <= 0) {
-		// No actual file size savings, so we skip writing the file or logging anything.
-		return false;
+	if (savings > 0) {
+		// Only write the minified HTML to the file if it's smaller.
+		await writeFile(htmlFile, minifiedHTML, {
+			encoding: "utf8",
+			signal,
+		});
 	}
-
-	await writeFile(htmlFile, minifiedHTML, {
-		encoding: "utf8",
-		signal,
-	});
 
 	const timeEnd = performance.now(); // --- TIMED BLOCK END ---
 
