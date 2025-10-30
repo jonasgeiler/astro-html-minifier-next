@@ -1,19 +1,20 @@
-import { type DebugLoggerFunction, debuglog } from "node:util";
 import { Worker } from "node:worker_threads";
 import type { MinifierOptions as MinifyHTMLOptions } from "html-minifier-next";
+import type { MinifyHTMLFileResult } from "./minify-html-file.js";
 
-let debug: DebugLoggerFunction = debuglog(
-	"astro-html-minifier-next",
-	(optimizedDebug) => {
-		// Replace with a logging function that optimizes out testing if the section is enabled.
-		debug = optimizedDebug;
-	},
-);
-
-interface WorkerWithPromise extends Worker {
-	_currentResolve?: (value: string) => void;
+interface WorkerWithPromise<T> extends Worker {
+	_currentResolve?: (value: T) => void;
 	_currentReject?: (reason?: unknown) => void;
 }
+
+export interface MinifyHTMLWorkerInput {
+	htmlFile: string;
+	minifyHTMLOptions: MinifyHTMLOptions;
+}
+
+export type MinifyHTMLWorkerOutput =
+	| { result: MinifyHTMLFileResult }
+	| { error?: unknown };
 
 export class MinifyHTMLWorkerPool {
 	protected maxWorkers: number;
@@ -32,7 +33,9 @@ export class MinifyHTMLWorkerPool {
 		this.queue = [];
 	}
 
-	protected async getAvailableWorker(): Promise<WorkerWithPromise> {
+	protected async getAvailableWorker(): Promise<
+		WorkerWithPromise<MinifyHTMLFileResult>
+	> {
 		// If there is an idle worker, use it.
 		if (this.idle.length) {
 			const worker = this.idle.shift();
@@ -43,44 +46,34 @@ export class MinifyHTMLWorkerPool {
 
 		// If we can create a new worker, do so.
 		if (this.pool.size < this.maxWorkers) {
-			const worker = new Worker(this.workerUrl) as WorkerWithPromise;
+			const worker = new Worker(
+				this.workerUrl,
+			) as WorkerWithPromise<MinifyHTMLFileResult>;
 
-			worker.on(
-				"message",
-				async (message: { result: string } | { error?: unknown }) => {
-					debug("worker '%s' sent a message: %O", worker, message);
+			worker.on("message", async (message: MinifyHTMLWorkerOutput) => {
+				if ("result" in message) {
+					worker._currentResolve?.(message.result);
+				} else {
+					worker._currentReject?.(message.error);
+				}
+				worker._currentResolve = worker._currentReject = undefined;
 
-					if ("result" in message) {
-						worker._currentResolve?.(message.result);
-					} else {
-						worker._currentReject?.(message.error);
-					}
-					worker._currentResolve = undefined;
-					worker._currentReject = undefined;
-
-					this.releaseWorker(worker);
-				},
-			);
+				this.releaseWorker(worker);
+			});
 
 			worker.on("error", (error) => {
-				debug("worker '%s' encountered an error: %O", worker, error);
-
 				worker._currentReject?.(error);
-				worker._currentResolve = undefined;
-				worker._currentReject = undefined;
+				worker._currentResolve = worker._currentReject = undefined;
 			});
 
 			worker.on("exit", (exitCode) => {
-				debug("worker '%s' exited with code %d", worker, exitCode);
-
 				this.removeWorker(worker);
 
 				if (exitCode !== 0) {
 					worker._currentReject?.(
 						new Error(`Worker failed with exit code ${exitCode}.`),
 					);
-					worker._currentResolve = undefined;
-					worker._currentReject = undefined;
+					worker._currentResolve = worker._currentReject = undefined;
 				}
 			});
 
@@ -119,16 +112,21 @@ export class MinifyHTMLWorkerPool {
 		}
 	}
 
-	public async minifyHTML(
-		html: string,
+	public async minifyHTMLFile(
+		htmlFile: string,
 		minifyHTMLOptions: MinifyHTMLOptions,
-	): Promise<string> {
+		// TODO: Signal?
+	): Promise<MinifyHTMLFileResult> {
 		const worker = await this.getAvailableWorker();
 
-		return new Promise<string>((resolve, reject) => {
+		return new Promise<MinifyHTMLFileResult>((resolve, reject) => {
 			worker._currentResolve = resolve;
 			worker._currentReject = reject;
-			worker.postMessage({ html, minifyHTMLOptions });
+			// TODO: Only transfer minifyHTMLOptions at initialization if possible.
+			worker.postMessage({
+				htmlFile,
+				minifyHTMLOptions,
+			} satisfies MinifyHTMLWorkerInput);
 		});
 	}
 

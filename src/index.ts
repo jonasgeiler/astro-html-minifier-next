@@ -1,13 +1,10 @@
-import { readFile, writeFile } from "node:fs/promises";
 import { availableParallelism as getAvailableParallelism } from "node:os";
 import { relative as getRelativePath } from "node:path";
 import { fileURLToPath } from "node:url";
 import { styleText } from "node:util";
 import type { AstroIntegration } from "astro";
-import {
-	type MinifierOptions as MinifyHTMLOptions,
-	minify as minifyHTML,
-} from "html-minifier-next";
+import type { MinifierOptions as MinifyHTMLOptions } from "html-minifier-next";
+import { minifyHTMLFile } from "./minify-html-file.js";
 import { MinifyHTMLWorkerPool } from "./minify-html-worker-pool.js";
 
 export interface HTMLMinifierOptions extends MinifyHTMLOptions {
@@ -93,39 +90,22 @@ export default function htmlMinifier(
 						const relativeAssetPath = getRelativePath(distPath, assetPath);
 						const logLineAssetPath = `  ${logLineArrow} /${relativeAssetPath} `;
 						tasks.push(async () => {
-							const timeStart = performance.now(); // --- TIMED BLOCK START ---
-
-							const html = await readFile(assetPath, {
-								encoding: "utf8",
-								signal,
-							});
-							const minifiedHtml = workerPool
-								? await workerPool.minifyHTML(html, minifyHtmlOptions) // TODO: Transfer, not copy
-								: await minifyHTML(html, minifyHtmlOptions);
-
-							const htmlSize = Buffer.byteLength(html);
-							const minifiedHtmlSize = Buffer.byteLength(minifiedHtml);
-							if (minifiedHtmlSize >= htmlSize) {
-								// No actual file size savings, so we skip writing the file or logging anything.
+							const result = workerPool
+								? await workerPool.minifyHTMLFile(assetPath, minifyHtmlOptions)
+								: await minifyHTMLFile(assetPath, minifyHtmlOptions, signal);
+							if (!result) {
+								// No savings, so we skip logging.
 								return;
 							}
 
-							await writeFile(assetPath, minifiedHtml, {
-								encoding: "utf8",
-								signal,
-							});
-
-							const timeEnd = performance.now(); // --- TIMED BLOCK END ---
-
 							// Log a nice summary of the minification savings and the time it took.
-							const savings = htmlSize - minifiedHtmlSize;
+							const { savings, time } = result;
 							const savingsStr =
 								savings < 1024
 									? `${savings}B`
 									: savings < 1048576
 										? `${(savings / 1024).toFixed(1)}kB`
 										: `${(savings / 1048576).toFixed(2)}MB`;
-							const time = timeEnd - timeStart;
 							const timeStr =
 								time < 1000
 									? `${Math.round(time)}ms`

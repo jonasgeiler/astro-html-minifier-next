@@ -1,8 +1,9 @@
 import { isMainThread, parentPort } from "node:worker_threads";
-import {
-	type MinifierOptions as MinifyHTMLOptions,
-	minify as minifyHTML,
-} from "html-minifier-next";
+import { minifyHTMLFile } from "./minify-html-file.js";
+import type {
+	MinifyHTMLWorkerInput,
+	MinifyHTMLWorkerOutput,
+} from "./minify-html-worker-pool.js";
 
 if (isMainThread) {
 	throw new Error("Not a worker thread.");
@@ -11,19 +12,13 @@ if (isMainThread) {
 // biome-ignore-start lint/style/noNonNullAssertion: I can assume `parentPort` is not null.
 parentPort!.on(
 	"message",
-	async ({
-		html,
-		minifyHTMLOptions,
-	}: {
-		html: string;
-		minifyHTMLOptions: MinifyHTMLOptions;
-	}) => {
+	async ({ htmlFile, minifyHTMLOptions }: MinifyHTMLWorkerInput) => {
 		try {
 			parentPort!.postMessage({
-				result: await minifyHTML(html, minifyHTMLOptions),
-			});
+				result: await minifyHTMLFile(htmlFile, minifyHTMLOptions),
+			} satisfies MinifyHTMLWorkerOutput);
 		} catch (error) {
-			parentPort!.postMessage({ error });
+			parentPort!.postMessage({ error } satisfies MinifyHTMLWorkerOutput);
 		}
 	},
 );
