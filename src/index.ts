@@ -70,10 +70,18 @@ export default function htmlMinifier(
 
 				let workerPool: MinifyHTMLFileWorkerPool | undefined;
 				if (maxWorkers > 0 && isTransferable(minifyHTMLOptions)) {
+					// TODO: Remove again.
+					logger.info(
+						styleText("yellow", `Using up to ${maxWorkers} worker threads.`),
+					);
+
 					workerPool = new MinifyHTMLFileWorkerPool(
 						maxWorkers,
 						minifyHTMLOptions,
 					);
+				} else {
+					// TODO: Remove again.
+					logger.info(styleText("yellow", `Not using worker threads.`));
 				}
 
 				const tasks: (() => Promise<void>)[] = [];
