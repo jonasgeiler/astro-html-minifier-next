@@ -36,8 +36,17 @@ jobs:
         env:
           # renovate: datasource=github-releases depName=rhysd/actionlint
           ACTIONLINT_VERSION: v1.7.8
+          # renovate: datasource=github-releases depName=koalaman/shellcheck
+          SHELLCHECK_VERSION: v0.11.0
         run: |
           set -o nounset -o xtrace
+
+          # Download, extract and set mode for shellcheck, which is used by actionlint.
+          wget -q "https://github.com/koalaman/shellcheck/releases/download/${SHELLCHECK_VERSION}/shellcheck-${SHELLCHECK_VERSION}.linux.x86_64.tar.xz" \
+            -O shellcheck.tar.xz
+          tar -xf shellcheck.tar.xz
+          mv "shellcheck-${SHELLCHECK_VERSION}/shellcheck" shellcheck
+          chmod +x shellcheck
 
           # Download, extract and set mode for actionlint.
           wget -q "https://github.com/rhysd/actionlint/releases/download/${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION#v}_linux_amd64.tar.gz" \
@@ -51,4 +60,4 @@ jobs:
           echo "::add-matcher::actionlint-problem-matcher.json"
 
       - name: Run actionlint
-        run: ./actionlint -verbose -color
+        run: ./actionlint -verbose -color -shellcheck=./shellcheck
