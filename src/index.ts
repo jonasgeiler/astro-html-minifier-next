@@ -27,7 +27,7 @@ export default function htmlMinifier(
 			"astro:build:done": async ({ logger, dir: distUrl, assets }) => {
 				logger.info(styleText(["bgGreen", "black"], " minifying html assets "));
 
-				const totalTimeStart = performance.now(); // --- TIMED BLOCK START ---
+				const totalTimeStart = performance.now(); // --- TOTAL TIMED BLOCK START ---
 
 				const tasks: (() => Promise<void>)[] = [];
 				let tasksTotal = 0;
@@ -135,15 +135,15 @@ export default function htmlMinifier(
 				// Wait for any remaining tasks to finish.
 				await Promise.all(executingTasks);
 
-				const totalTimeEnd = performance.now(); // --- TIMED BLOCK END ---
+				const totalTimeEnd = performance.now(); // --- TOTAL TIMED BLOCK END ---
+				const totalTime = totalTimeEnd - totalTimeStart;
 
 				// Log how long processing all assets took.
-				const totalTime = totalTimeEnd - totalTimeStart;
-				const totalTimeStr =
+				const totalTimeWithUnit =
 					totalTime < 1000
 						? `${Math.round(totalTime)}ms`
 						: `${(totalTime / 1000).toFixed(2)}s`;
-				logger.info(styleText("green", `✓ Completed in ${totalTimeStr}.`));
+				logger.info(styleText("green", `✓ Completed in ${totalTimeWithUnit}.`));
 			},
 		},
 	};
