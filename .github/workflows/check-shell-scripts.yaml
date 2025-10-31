@@ -65,6 +65,7 @@ jobs:
 
       - name: Run shellcheck
         run: |
+          set -o nounset -o xtrace
           # Support advanced globbing patterns.
           shopt -s nullglob globstar
 
