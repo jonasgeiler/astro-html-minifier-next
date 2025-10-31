@@ -24,7 +24,11 @@ export default function htmlMinifier(
 	return {
 		name: "astro-html-minifier-next",
 		hooks: {
-			"astro:build:done": async ({ logger, dir: distUrl, assets }) => {
+			"astro:build:done": async ({
+				assets,
+				dir: distUrl,
+				logger,
+			}): Promise<void> => {
 				logger.info(styleText(["bgGreen", "black"], " minifying html assets "));
 
 				const totalTimeStart = performance.now(); // --- TOTAL TIMED BLOCK START ---
@@ -69,7 +73,8 @@ export default function htmlMinifier(
 							const timeEnd = performance.now(); // --- TIMED BLOCK END ---
 							const time = timeEnd - timeStart;
 
-							// Log a nice summary of the minification savings and the time it took.
+							// Log a nice summary of the minification savings and the time it
+							// took.
 							const savingsSign = savings > 0 ? "-" : "+";
 							const savingsAbs = Math.abs(savings);
 							const savingsWithUnit =
@@ -99,14 +104,17 @@ export default function htmlMinifier(
 					}
 				}
 
-				// We use a quadruple of the available parallelism here, even if we don't actually run the tasks in different threads or anything.
-				// The available parallelism is a good indicator of machine capabilities, and the multiplier gives a good balance of speed and resource usage.
+				// We use a quadruple of the available parallelism here, even if we
+				// don't actually run the tasks in different threads or anything. The
+				// available parallelism is a good indicator of machine capabilities,
+				// and the multiplier gives a good balance of speed and resource usage.
 				const maxExecutingTasksSize = getAvailableParallelism() * 4;
 
 				// This holds the current batch of promises that are waiting to fulfill.
 				const executingTasks = new Set<Promise<void>>();
 
-				// Batch the tasks to avoid minifying too many files at once, which could lead to memory and performance issues.
+				// Batch the tasks to avoid minifying too many files at once, which
+				// could lead to memory and performance issues.
 				for (const task of tasks) {
 					const taskPromise = task()
 						.then(() => {
@@ -122,8 +130,9 @@ export default function htmlMinifier(
 					executingTasks.add(taskPromise);
 
 					if (executingTasks.size >= maxExecutingTasksSize) {
-						// If the amount of executing tasks reaches the limit, we wait until the one of them finishes,
-						// and therefore gets deleted from the list, before continuing with the next task.
+						// If the amount of executing tasks reaches the limit, we wait
+						// until the one of them finishes, and therefore gets deleted from
+						// the list, before continuing with the next task.
 						await Promise.race(executingTasks);
 					}
 
