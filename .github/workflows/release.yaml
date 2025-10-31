@@ -58,7 +58,7 @@ jobs:
 
       - name: Publish package to npm
         env:
-          TAG: ${{ env.IS_PRERELEASE && 'next' || 'latest' }}
+          TAG: ${{ env.IS_PRERELEASE == 'true' && 'next' || 'latest' }}
         run: pnpm publish --access=public --no-git-checks --tag="${TAG}"
 
       - name: Create package tarball
