@@ -70,5 +70,5 @@ jobs:
 
           # We have to use gcc format and disable colors for the problem matcher.
           ./shellcheck --norc --enable=all --format=gcc --color=never \
-            **/*.{sh,bash,mksh,bats,zsh} \
+            ./**/*.{sh,bash,mksh,bats,zsh} \
             .githooks/*
