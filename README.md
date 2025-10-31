@@ -18,9 +18,8 @@ import htmlMinifier from "astro-html-minifier-next";
 export default defineConfig({
   integrations: [
     htmlMinifier({
-      /* html-minifier-next options */
-      // TODO: Put optimized options here.
-      caseSensitive: false,
+      /* My recommended html-minifier-next options: */
+      caseSensitive: true,
       collapseBooleanAttributes: true,
       collapseInlineTagWhitespace: true,
       collapseWhitespace: true,
@@ -37,7 +36,7 @@ export default defineConfig({
       preserveLineBreaks: false,
       preventAttributesEscaping: false,
       processConditionalComments: false,
-      removeAttributeQuotes: true,
+      removeAttributeQuotes: false, // The HTML specification recommends to always use quotes, but technically they are optional in some cases.
       removeComments: true,
       removeEmptyAttributes: true,
       removeEmptyElements: false,
