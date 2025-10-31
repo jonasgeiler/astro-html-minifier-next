@@ -1,7 +1,7 @@
 {
   "name": "astro-html-minifier-next",
   "version": "0.2.1",
-  "description": "Astro integration for html-minifier-next",
+  "description": "Minify Astro HTML assets using html-minifier-next!",
   "homepage": "https://github.com/jonasgeiler/astro-html-minifier-next#readme",
   "bugs": "https://github.com/jonasgeiler/astro-html-minifier-next/issues",
   "license": "MIT",
@@ -50,5 +50,20 @@
       "default": "./dist/index.js"
     },
     "./package.json": "./package.json"
-  }
+  },
+  "keywords": [
+    "astro",
+    "astro-integration",
+    "html-minifier",
+    "html-minifier-next",
+    "html-minifier-terser",
+    "minifier",
+    "optimization",
+    "perf",
+    "performance",
+    "tooling",
+    "utility",
+    "utils",
+    "withastro"
+  ]
 }
