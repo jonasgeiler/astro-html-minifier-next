@@ -56,7 +56,7 @@ export default defineConfig({
 ## Installation
 
 Add the integration to your Astro project using the `astro add` command.  
-This will install the adapter and make the appropriate changes to your
+This will install the package and make the appropriate changes to your
 `astro.config.mjs`/`astro.config.ts` file in one step:
 ```bash
 npx astro add astro-html-minifier-next
