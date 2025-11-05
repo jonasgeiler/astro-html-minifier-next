@@ -18,7 +18,7 @@ import {
  * @returns The Astro integration.
  */
 export default function htmlMinifier(
-	options: HTMLMinifierOptions,
+	options?: HTMLMinifierOptions,
 ): AstroIntegration {
 	// API Reference: https://docs.astro.build/en/reference/integrations-reference/
 	return {
