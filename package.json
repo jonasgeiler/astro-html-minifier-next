@@ -1,6 +1,6 @@
 {
   "name": "astro-html-minifier-next",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Minify Astro HTML assets using html-minifier-next!",
   "homepage": "https://github.com/jonasgeiler/astro-html-minifier-next#readme",
   "bugs": "https://github.com/jonasgeiler/astro-html-minifier-next/issues",
