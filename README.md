@@ -108,7 +108,7 @@ You can also check out the
 > [!TIP]
 > To ensure consistent and optimal browser support throughout your project,
 > I recommend setting the `targets` property of the `minifyCSS` option to your
-> project's [Browserslist][browserslist] query.  
+> project's [Browserslist][browserslist] query.
 > This configures [Lightning CSS][lightningcss] (the CSS minifier used by
 > [html-minifier-next][html-minifier-next]) to properly optimize the CSS
 > according to the browsers you want to support.
