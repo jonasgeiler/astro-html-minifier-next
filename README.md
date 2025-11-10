@@ -148,9 +148,9 @@ You can also check out the
 ## Credits
 
 This integration wouldn't be possible without the awesome work of
-[Juriy Zaytsev (@kangax)][@kangax] ([html-minifier][html-minifier]),
+[Juriy Zaytsev aka. @kangax][@kangax] ([html-minifier][html-minifier]),
 [the Terser team][@terser] ([html-minifier-terser][html-minifier-terser]), and
-of course [Jens Oliver Meiert (@j9t)][@j9t] ([html-minifier-next][html-minifier-next]).
+of course [Jens Oliver Meiert aka. @j9t][@j9t] ([html-minifier-next][html-minifier-next]).
 
 [astro]: https://astro.build/
 [html-minifier-next]: https://www.npmjs.com/package/html-minifier-next
