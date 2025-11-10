@@ -138,9 +138,10 @@ You can find a quick reference of all available options in the
 >       },
 >     }),
 >   ],
->   // ...
 > });
 > ```
+> 
+> More information can be found in the [Lightning CSS documentation][lightningcss-docs].
 
 ## Credits
 
@@ -158,6 +159,7 @@ of course [Jens Oliver Meiert (@j9t)][@j9t] ([html-minifier-next][html-minifier-
 [package-on-npm]: https://www.npmjs.com/package/astro-html-minifier-next
 [browserslist]: https://browsersl.ist/
 [lightningcss]: https://lightningcss.dev/
+[lightningcss-docs]: https://lightningcss.dev/docs.html#with-vite
 [@kangax]: https://github.com/kangax
 [html-minifier]: https://github.com/kangax/html-minifier
 [@terser]: https://github.com/terser
