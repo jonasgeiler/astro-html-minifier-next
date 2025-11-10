@@ -9,6 +9,9 @@ import {
 	minify as minifyHTML,
 } from "html-minifier-next";
 
+// Re-export the HTMLMinifierOptions type for users who want to use it.
+export type { HTMLMinifierOptions };
+
 /**
  * An Astro integration that minifies HTML assets using
  * [html-minifier-next](https://www.npmjs.com/package/html-minifier-next).
