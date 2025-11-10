@@ -4,7 +4,7 @@
 
 - **Improves page speed** - Reduces the size of HTML assets by removing everything unnecessary.
 - **Highly configurable** - All options from [html-minifier-next][html-minifier-next] are supported and can be customized.
-- **Fast** - Runs the minification of all assets with (limited) concurrency.
+- **Fast** - Runs the minification of all assets with (limited) concurrency and [Lightning CSS][lightningcss].
 
 [![Version badge](https://img.shields.io/npm/v/astro-html-minifier-next?style=for-the-badge&label=Version&labelColor=2a2d35&color=f2ebf4)][latest-release]
 [![NPM downloads badge](https://img.shields.io/npm/d18m/astro-html-minifier-next?style=for-the-badge&label=NPM%20Downloads&labelColor=2a2d35&color=e13fa0&cacheSeconds=86400)][package-on-npm]
