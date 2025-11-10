@@ -113,7 +113,7 @@ You can also check out the
 > [html-minifier-next][html-minifier-next]) to properly optimize the CSS
 > according to the browsers you want to support.
 > 
-> You can do this in Astro, by adding the following lines to your
+> You can do this, by adding the following lines to your
 > `astro.config.mjs`/`astro.config.ts` file:
 > ```typescript
 > import { defineConfig } from "astro/config";
