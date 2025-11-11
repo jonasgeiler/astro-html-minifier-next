@@ -21,7 +21,7 @@ export default defineConfig({
       /* My recommended html-minifier-next options: */
       caseSensitive: true,
       collapseBooleanAttributes: true,
-      collapseInlineTagWhitespace: true,
+      collapseInlineTagWhitespace: false,
       collapseWhitespace: true,
       conservativeCollapse: false,
       continueOnParseError: false,
