@@ -62,9 +62,9 @@ This will install the package and make the appropriate changes to your
 ```bash
 npx astro add astro-html-minifier-next
 ```
-If you prefer to install the integration manually instead, complete the
+If you prefer to add the integration manually instead, complete the
 following two steps:
-1. Install the integration to your project’s dependencies using your preferred
+1. Install the package to your project’s dependencies using your preferred
    package manager.  
    If you’re using npm or aren’t sure, run this in the terminal:
    ```bash
@@ -107,7 +107,7 @@ You can also check out the
 [JSDoc comments in the source code][html-minifier-next-options-source].
 
 > [!TIP]
-> To ensure consistent and optimal browser support throughout your project,
+> To ensure consistent and wide browser support throughout your project,
 > I recommend setting the `targets` property of the `minifyCSS` option to your
 > project's [Browserslist][browserslist] query.
 > This configures [Lightning CSS][lightningcss] (the CSS minifier used by
