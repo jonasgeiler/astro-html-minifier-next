@@ -41,7 +41,7 @@ export default defineConfig({
       removeComments: true,
       removeEmptyAttributes: true,
       removeEmptyElements: false,
-      removeOptionalTags: true,
+      removeOptionalTags: false,
       removeRedundantAttributes: true,
       removeScriptTypeAttributes: true,
       removeStyleLinkTypeAttributes: true,
