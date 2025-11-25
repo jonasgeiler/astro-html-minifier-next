@@ -86,7 +86,7 @@ export default function htmlMinifier(
 							const hasSavings = savings > 0;
 							if (hasSavings || alwaysWriteMinifiedHTML) {
 								// Only write the minified HTML to the file if it's smaller,
-								// or if alwaysWriteMinified is enabled.
+								// or if alwaysWriteMinifiedHTML is enabled.
 								await writeFile(assetPath, minifiedHTML, {
 									encoding: "utf8",
 									signal,
