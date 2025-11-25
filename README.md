@@ -171,7 +171,7 @@ of course [Jens Oliver Meiert aka. @j9t][@j9t] ([html-minifier-next][html-minifi
 [astro]: https://astro.build/
 [html-minifier-next]: https://www.npmjs.com/package/html-minifier-next
 [html-minifier-next-options]: https://www.npmjs.com/package/html-minifier-next#options-quick-reference
-[html-minifier-next-options-source]: https://github.com/j9t/html-minifier-next/blob/ba95daa75dfec6e3c6bb8bd1b0af3ad84e596e61/src/htmlminifier.js#L1482
+[html-minifier-next-options-source]: https://github.com/j9t/html-minifier-next/blob/e2995fc35a7a3906d3d1960d508d0d24a02128c8/src/htmlminifier.js#L1501
 [latest-release]: https://github.com/jonasgeiler/astro-html-minifier-next/releases/latest
 [package-on-bundlejs]: https://bundlejs.com/?q=astro-html-minifier-next
 [package-on-jsr]: https://jsr.io/@jonasgeiler/astro-html-minifier-next
