@@ -106,6 +106,9 @@ You can find a quick reference of all available options in the
 You can also check out the
 [JSDoc comments in the source code][html-minifier-next-options-source].
 
+There is currently one additional option only specific to this Astro
+integration. [See below](#alwayswriteminifiedhtml).
+
 > [!TIP]
 > To ensure consistent and wide browser support throughout your project,
 > I recommend setting the `targets` property of the `minifyCSS` option to your
@@ -146,9 +149,21 @@ You can also check out the
 > 
 > More information can be found in the [Lightning CSS documentation][lightningcss-docs].
 
+#### `alwaysWriteMinifiedHTML`
+
+This option is not passed to [html-minifier-next][html-minifier-next]. It
+only controls the behavior of this Astro integration.
+
+By default, the integration only overwrites the original HTML assets
+if the minified HTML is smaller.
+However, there are [cases][issue-7] where you might actually prefer the
+larger output due to special compatibility reasons or otherwise.  
+Setting this option to `true` causes the integration to always overwrite
+the HTML assets with their minified results, regardless of size.
+
 ## Credits
 
-This integration wouldn't be possible without the awesome work of
+This project wouldn't be possible without the awesome work of
 [Juriy Zaytsev aka. @kangax][@kangax] ([html-minifier][html-minifier]),
 [the Terser team][@terser] ([html-minifier-terser][html-minifier-terser]), and
 of course [Jens Oliver Meiert aka. @j9t][@j9t] ([html-minifier-next][html-minifier-next]).
@@ -164,6 +179,7 @@ of course [Jens Oliver Meiert aka. @j9t][@j9t] ([html-minifier-next][html-minifi
 [browserslist]: https://browsersl.ist/
 [lightningcss]: https://lightningcss.dev/
 [lightningcss-docs]: https://lightningcss.dev/docs.html#with-vite
+[issue-7]: https://github.com/jonasgeiler/astro-html-minifier-next/issues/7
 [@kangax]: https://github.com/kangax
 [html-minifier]: https://github.com/kangax/html-minifier
 [@terser]: https://github.com/terser
