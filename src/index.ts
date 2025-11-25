@@ -4,13 +4,26 @@ import { relative as getRelativePath } from "node:path";
 import { fileURLToPath } from "node:url";
 import { styleText } from "node:util";
 import type { AstroIntegration } from "astro";
-import {
-	type MinifierOptions as HTMLMinifierOptions,
-	minify as minifyHTML,
-} from "html-minifier-next";
+import { type MinifierOptions, minify as minifyHTML } from "html-minifier-next";
 
-// Re-export the HTMLMinifierOptions type for users who want to use it.
-export type { HTMLMinifierOptions };
+/**
+ * Options from
+ * [html-minifier-next](https://www.npmjs.com/package/html-minifier-next),
+ * extended with some options only used by the {@link htmlMinifier}
+ * Astro integration.
+ */
+export interface HTMLMinifierOptions extends MinifierOptions {
+	/**
+	 * This option is only used by the {@link htmlMinifier} Astro integration.
+	 *
+	 * If `true`, the HTML assets will always be overwritten with their
+	 * minified HTML, even if it would result in a larger file size than
+	 * the original.
+	 *
+	 * @default false
+	 */
+	alwaysWriteMinifiedHTML?: boolean;
+}
 
 /**
  * An Astro integration that minifies HTML assets using
@@ -21,7 +34,7 @@ export type { HTMLMinifierOptions };
  * @returns The Astro integration.
  */
 export default function htmlMinifier(
-	options?: HTMLMinifierOptions,
+	options: HTMLMinifierOptions = {},
 ): AstroIntegration {
 	// API Reference: https://docs.astro.build/en/reference/integrations-reference/
 	return {
@@ -35,6 +48,11 @@ export default function htmlMinifier(
 				logger.info(styleText(["bgGreen", "black"], " minifying html assets "));
 
 				const totalTimeStart = performance.now(); // --- TOTAL TIMED BLOCK START ---
+
+				const {
+					alwaysWriteMinifiedHTML = false,
+					...minifyHTMLOptions // Rest of the options go to html-minifier-next.
+				} = options;
 
 				const tasks: (() => Promise<void>)[] = [];
 				let tasksTotal = 0;
@@ -61,12 +79,14 @@ export default function htmlMinifier(
 								encoding: "utf8",
 								signal,
 							});
-							const minifiedHTML = await minifyHTML(html, options);
+							const minifiedHTML = await minifyHTML(html, minifyHTMLOptions);
 
 							const savings =
 								Buffer.byteLength(html) - Buffer.byteLength(minifiedHTML);
-							if (savings > 0) {
-								// Only write the minified HTML to the file if it's smaller.
+							const hasSavings = savings > 0;
+							if (hasSavings || alwaysWriteMinifiedHTML) {
+								// Only write the minified HTML to the file if it's smaller,
+								// or if alwaysWriteMinifiedHTML is enabled.
 								await writeFile(assetPath, minifiedHTML, {
 									encoding: "utf8",
 									signal,
@@ -78,7 +98,7 @@ export default function htmlMinifier(
 
 							// Log a nice summary of the minification savings and the time it
 							// took.
-							const savingsSign = savings > 0 ? "-" : "+";
+							const savingsSign = hasSavings ? "-" : "+";
 							const savingsAbs = Math.abs(savings);
 							const savingsWithUnit =
 								savingsAbs < 1024
@@ -90,11 +110,17 @@ export default function htmlMinifier(
 								time < 1000
 									? `${Math.round(time)}ms`
 									: `${(time / 1000).toFixed(2)}s`;
+							const savingsNote =
+								hasSavings || alwaysWriteMinifiedHTML
+									? hasSavings
+										? ""
+										: ", always write enabled"
+									: ", skipped";
 							logger.info(
 								logLineAssetPath +
 									styleText(
-										savings <= 0 ? "yellow" : "dim",
-										`(${savingsSign}${savingsWithUnit}${savings <= 0 ? ", skipped" : ""}) `,
+										hasSavings ? "dim" : "yellow",
+										`(${savingsSign}${savingsWithUnit}${savingsNote}) `,
 									) +
 									styleText(
 										"dim",
