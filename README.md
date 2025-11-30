@@ -9,7 +9,7 @@
 [![Version badge](https://img.shields.io/npm/v/astro-html-minifier-next?style=for-the-badge&label=Version&labelColor=2a2d35&color=f2ebf4)][latest-release]
 [![NPM downloads badge](https://img.shields.io/npm/d18m/astro-html-minifier-next?style=for-the-badge&label=NPM%20Downloads&labelColor=2a2d35&color=e13fa0&cacheSeconds=86400)][package-on-npm]
 [![JSR score badge](https://jsr.io/badges/@jonasgeiler/astro-html-minifier-next/score?style=for-the-badge&label=Score&logoColor=fff&labelColor=2a2d35&color=f2ebf4&cacheSeconds=86400)][package-on-jsr]
-[![Minified size (gzip) badge](https://img.shields.io/bundlejs/size/astro-html-minifier-next?style=for-the-badge&labelColor=2a2d35&color=e13fa0&cacheSeconds=86400)][package-on-bundlejs]
+[![Minified size (gzip) badge](https://img.shields.io/bundlejs/size/astro-html-minifier-next?style=for-the-badge&labelColor=2a2d35&color=e13fa0&cacheSeconds=86400&externals=lightningcss)][package-on-bundlejs]
 
 ```typescript
 import { defineConfig } from "astro/config";
