@@ -16,11 +16,11 @@ importers:
         specifier: 2.3.11
         version: 2.3.11
       '@types/node':
-        specifier: 24.10.4
-        version: 24.10.4
+        specifier: 24.10.9
+        version: 24.10.9
       astro:
         specifier: 5.16.8
-        version: 5.16.8(@types/node@24.10.4)(lightningcss@1.30.2)(rollup@4.53.3)(terser@5.44.1)(typescript@5.9.3)
+        version: 5.16.8(@types/node@24.10.9)(lightningcss@1.30.2)(rollup@4.53.3)(terser@5.44.1)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -591,8 +591,8 @@ packages:
   '@types/nlcst@2.0.3':
     resolution: {integrity: sha512-vSYNSDe6Ix3q+6Z7ri9lyWqgGhJTmzRjZRqyq15N0Z/1/UnVsno9G/N40NBijoYx2seFDIl0+B2mgAb9mezUCA==}
 
-  '@types/node@24.10.4':
-    resolution: {integrity: sha512-vnDVpYPMzs4wunl27jHrfmwojOGKya0xyM3sH+UE5iv5uPS6vX7UIoh6m+vQc5LGBq52HBKPIn/zcSZVzeDEZg==}
+  '@types/node@24.10.9':
+    resolution: {integrity: sha512-ne4A0IpG3+2ETuREInjPNhUGis1SFjv1d5asp8MzEAGtOZeTeHVDOYqOgqfhvseqg/iXty2hjBf1zAOb7RNiNw==}
 
   '@types/relateurl@0.2.33':
     resolution: {integrity: sha512-bTQCKsVbIdzLqZhLkF5fcJQreE4y1ro4DIyVrlDNSCJRRwHhB8Z+4zXXa8jN6eDvc2HbRsEYgbvrnGvi54EpSw==}
@@ -2133,7 +2133,7 @@ snapshots:
     dependencies:
       '@types/unist': 3.0.3
 
-  '@types/node@24.10.4':
+  '@types/node@24.10.9':
     dependencies:
       undici-types: 7.16.0
 
@@ -2166,7 +2166,7 @@ snapshots:
 
   array-iterate@2.0.1: {}
 
-  astro@5.16.8(@types/node@24.10.4)(lightningcss@1.30.2)(rollup@4.53.3)(terser@5.44.1)(typescript@5.9.3):
+  astro@5.16.8(@types/node@24.10.9)(lightningcss@1.30.2)(rollup@4.53.3)(terser@5.44.1)(typescript@5.9.3):
     dependencies:
       '@astrojs/compiler': 2.13.0
       '@astrojs/internal-helpers': 0.7.5
@@ -2223,8 +2223,8 @@ snapshots:
       unist-util-visit: 5.0.0
       unstorage: 1.17.3
       vfile: 6.0.3
-      vite: 6.4.1(@types/node@24.10.4)(lightningcss@1.30.2)(terser@5.44.1)
-      vitefu: 1.1.1(vite@6.4.1(@types/node@24.10.4)(lightningcss@1.30.2)(terser@5.44.1))
+      vite: 6.4.1(@types/node@24.10.9)(lightningcss@1.30.2)(terser@5.44.1)
+      vitefu: 1.1.1(vite@6.4.1(@types/node@24.10.9)(lightningcss@1.30.2)(terser@5.44.1))
       xxhash-wasm: 1.1.0
       yargs-parser: 21.1.1
       yocto-spinner: 0.2.3
@@ -3526,7 +3526,7 @@ snapshots:
       '@types/unist': 3.0.3
       vfile-message: 4.0.3
 
-  vite@6.4.1(@types/node@24.10.4)(lightningcss@1.30.2)(terser@5.44.1):
+  vite@6.4.1(@types/node@24.10.9)(lightningcss@1.30.2)(terser@5.44.1):
     dependencies:
       esbuild: 0.25.12
       fdir: 6.5.0(picomatch@4.0.3)
@@ -3535,14 +3535,14 @@ snapshots:
       rollup: 4.53.3
       tinyglobby: 0.2.15
     optionalDependencies:
-      '@types/node': 24.10.4
+      '@types/node': 24.10.9
       fsevents: 2.3.3
       lightningcss: 1.30.2
       terser: 5.44.1
 
-  vitefu@1.1.1(vite@6.4.1(@types/node@24.10.4)(lightningcss@1.30.2)(terser@5.44.1)):
+  vitefu@1.1.1(vite@6.4.1(@types/node@24.10.9)(lightningcss@1.30.2)(terser@5.44.1)):
     optionalDependencies:
-      vite: 6.4.1(@types/node@24.10.4)(lightningcss@1.30.2)(terser@5.44.1)
+      vite: 6.4.1(@types/node@24.10.9)(lightningcss@1.30.2)(terser@5.44.1)
 
   web-namespaces@2.0.1: {}
 
