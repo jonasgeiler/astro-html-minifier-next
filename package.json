@@ -30,7 +30,7 @@
     "astro": "^5.0.0"
   },
   "dependencies": {
-    "html-minifier-next": "^4.3.0"
+    "html-minifier-next": "^5.0.0"
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.15",
