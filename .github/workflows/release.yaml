@@ -47,6 +47,7 @@ jobs:
         run: pnpm install
 
       - name: Publish package to JSR
+        if: false
         run: pnpx jsr publish
 
       - name: Replace GitHub-flavored Markdown alerts with standard Markdown
