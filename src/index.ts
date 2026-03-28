@@ -131,18 +131,29 @@ export default function htmlMinifier(
 							} catch (error) {
 								// We log which file the error happened in, to make debugging
 								// easier, and then rethrow it.
-								const errorLogLineArrow = styleText("red", "▶");
+								const isAborted =
+									signal.aborted &&
+									error instanceof Error &&
+									error.name === "AbortError" &&
+									error.message === "The operation was aborted";
+								const errorLogLineArrow = styleText(
+									isAborted ? "yellow" : "red",
+									"▶",
+								);
 								const errorLogLineAssetPath = `  ${errorLogLineArrow} /${relativeAssetPath} `;
 								logger.info(
 									errorLogLineAssetPath +
-										styleText("red", "ERROR ") +
-										styleText(
-											"dim",
-											// Turning the error into a string and then encoding it as
-											// JSON makes it into a nice single-line message.
-											// The stack trace gets logged by Astro after we rethrow.
-											`(${JSON.stringify(String(error))}) (${++tasksDone}/${tasksTotal})`,
-										),
+										(isAborted
+											? styleText("yellow", "ABORTED ")
+											: styleText("red", "ERROR ") +
+												styleText(
+													"dim",
+													// Turning the error into a string and then encoding
+													// to JSON makes it into a nice single-line message.
+													// The stack trace gets logged after we rethrow.
+													`(${JSON.stringify(String(error))}) `,
+												)) +
+										styleText("dim", `(${++tasksDone}/${tasksTotal})`),
 								);
 								throw error;
 							}
