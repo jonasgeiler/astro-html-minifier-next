@@ -73,60 +73,90 @@ export default function htmlMinifier(
 						const relativeAssetPath = getRelativePath(distPath, assetPath);
 						const logLineAssetPath = `  ${logLineArrow} /${relativeAssetPath} `;
 						tasks.push(async () => {
-							const timeStart = performance.now(); // --- TIMED BLOCK START ---
+							try {
+								const timeStart = performance.now(); // --- TIMED BLOCK START ---
 
-							const html = await readFile(assetPath, {
-								encoding: "utf8",
-								signal,
-							});
-							const minifiedHTML = await minifyHTML(html, minifyHTMLOptions);
-
-							const savings =
-								Buffer.byteLength(html) - Buffer.byteLength(minifiedHTML);
-							const hasSavings = savings > 0;
-							if (hasSavings || alwaysWriteMinifiedHTML) {
-								// Only write the minified HTML to the file if it's smaller,
-								// or if alwaysWriteMinifiedHTML is enabled.
-								await writeFile(assetPath, minifiedHTML, {
+								const html = await readFile(assetPath, {
 									encoding: "utf8",
 									signal,
 								});
+								const minifiedHTML = await minifyHTML(html, minifyHTMLOptions);
+
+								const savings =
+									Buffer.byteLength(html) - Buffer.byteLength(minifiedHTML);
+								const hasSavings = savings > 0;
+								if (hasSavings || alwaysWriteMinifiedHTML) {
+									// Only write the minified HTML to the file if it's smaller,
+									// or if alwaysWriteMinifiedHTML is enabled.
+									await writeFile(assetPath, minifiedHTML, {
+										encoding: "utf8",
+										signal,
+									});
+								}
+
+								const timeEnd = performance.now(); // --- TIMED BLOCK END ---
+								const time = timeEnd - timeStart;
+
+								// Log a nice summary of the minification savings and the time it
+								// took.
+								const savingsSign = hasSavings ? "-" : "+";
+								const savingsAbs = Math.abs(savings);
+								const savingsWithUnit =
+									savingsAbs < 1024
+										? `${savingsAbs}B`
+										: savingsAbs < 1048576
+											? `${(savingsAbs / 1024).toFixed(1)}kB`
+											: `${(savingsAbs / 1048576).toFixed(2)}MB`;
+								const timeWithUnit =
+									time < 1000
+										? `${Math.round(time)}ms`
+										: `${(time / 1000).toFixed(2)}s`;
+								const savingsNote =
+									hasSavings || alwaysWriteMinifiedHTML
+										? hasSavings
+											? ""
+											: ", always write enabled"
+										: ", skipped";
+								logger.info(
+									logLineAssetPath +
+										styleText(
+											hasSavings ? "dim" : "yellow",
+											`(${savingsSign}${savingsWithUnit}${savingsNote}) `,
+										) +
+										styleText(
+											"dim",
+											`(+${timeWithUnit}) (${++tasksDone}/${tasksTotal})`,
+										),
+								);
+							} catch (error) {
+								// We log which file the error happened in, to make debugging
+								// easier, and then rethrow it.
+								const isAborted =
+									signal.aborted &&
+									error instanceof Error &&
+									error.name === "AbortError" &&
+									error.message === "The operation was aborted";
+								const errorLogLineArrow = styleText(
+									isAborted ? "yellow" : "red",
+									"▶",
+								);
+								const errorLogLineAssetPath = `  ${errorLogLineArrow} /${relativeAssetPath} `;
+								logger.info(
+									errorLogLineAssetPath +
+										(isAborted
+											? styleText("yellow", "ABORTED ")
+											: styleText("red", "ERROR ") +
+												styleText(
+													"dim",
+													// Turning the error into a string and then encoding
+													// to JSON makes it into a nice single-line message.
+													// The stack trace gets logged after we rethrow.
+													`(${JSON.stringify(String(error))}) `,
+												)) +
+										styleText("dim", `(${++tasksDone}/${tasksTotal})`),
+								);
+								throw error;
 							}
-
-							const timeEnd = performance.now(); // --- TIMED BLOCK END ---
-							const time = timeEnd - timeStart;
-
-							// Log a nice summary of the minification savings and the time it
-							// took.
-							const savingsSign = hasSavings ? "-" : "+";
-							const savingsAbs = Math.abs(savings);
-							const savingsWithUnit =
-								savingsAbs < 1024
-									? `${savingsAbs}B`
-									: savingsAbs < 1048576
-										? `${(savingsAbs / 1024).toFixed(1)}kB`
-										: `${(savingsAbs / 1048576).toFixed(2)}MB`;
-							const timeWithUnit =
-								time < 1000
-									? `${Math.round(time)}ms`
-									: `${(time / 1000).toFixed(2)}s`;
-							const savingsNote =
-								hasSavings || alwaysWriteMinifiedHTML
-									? hasSavings
-										? ""
-										: ", always write enabled"
-									: ", skipped";
-							logger.info(
-								logLineAssetPath +
-									styleText(
-										hasSavings ? "dim" : "yellow",
-										`(${savingsSign}${savingsWithUnit}${savingsNote}) `,
-									) +
-									styleText(
-										"dim",
-										`(+${timeWithUnit}) (${++tasksDone}/${tasksTotal})`,
-									),
-							);
 						});
 
 						tasksTotal++;
