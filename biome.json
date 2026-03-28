@@ -12,7 +12,13 @@
   "formatter": {
     "enabled": true,
     "useEditorconfig": true,
-    "includes": ["**", "!package.json", "!jsr.json", "!tsconfig.json"]
+    "includes": [
+      "**",
+      "!**/*.md",
+      "!package.json",
+      "!jsr.json",
+      "!tsconfig.json"
+    ]
   },
   "linter": {
     "enabled": true,
