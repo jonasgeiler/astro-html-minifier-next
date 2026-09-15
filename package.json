@@ -33,7 +33,7 @@
     "html-minifier-next": "^5.2.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.16",
+    "@biomejs/biome": "2.5.13",
     "@types/node": "25.9.6",
     "astro": "6.0.8",
     "typescript": "5.9.3"
