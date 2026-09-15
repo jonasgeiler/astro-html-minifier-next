@@ -1,21 +1,27 @@
-# EditorConfig configuration
-# See: https://editorconfig.org
+############################
+#    EditorConfig file     #
+# https://editorconfig.org #
+############################
 
 root = true
 
 [*]
 indent_style             = tab
-indent_size              = 2
-#tab_width               = 2
+indent_size              = tab
 end_of_line              = lf
 charset                  = utf-8
 trim_trailing_whitespace = true
 insert_final_newline     = true
 max_line_length          = 80
+# Recommended but not forced:
+#tab_width               = 2
 
-[*.{json,yml,yaml,md,mdx}]
+[*.{json,yml,yaml,md}]
 indent_style = space
 indent_size  = 2
 
-[*.{md,mdx}]
+[*.svg]
+insert_final_newline = false
+
+[*.md]
 trim_trailing_whitespace = false

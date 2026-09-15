@@ -1,12 +1,14 @@
-# Git ignore file
-# See: https://git-scm.com/docs/gitignore
+######################################
+#          Git ignore file           #
+# https://git-scm.com/docs/gitignore #
+######################################
 
-# OS
-.DS_Store
-
-# IDE
-.idea/
-.vscode/
+# Editor/IDE
+.idea/*
+!.idea/externalDependencies.xml
+!.idea/icon.svg
+.vscode/*
+!.vscode/extensions.json
 
 # Dependencies
 node_modules/
@@ -31,7 +33,6 @@ esbuild-why-*
 /dist/
 *.tgz
 
-# Scribble Files
-test.[jt]s
-test.[cm][jt]s
-test.sh
+# Temporary Files
+scratch.*
+scribble.*
