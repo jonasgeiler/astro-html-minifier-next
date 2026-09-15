@@ -45,7 +45,9 @@ export default function htmlMinifier(
 				dir: distUrl,
 				logger,
 			}): Promise<void> => {
-				logger.info(styleText(["bgGreen", "black"], " minifying html assets "));
+				logger.info(
+					styleText(["bgGreen", "black"], " minifying html assets "),
+				);
 
 				const totalTimeStart = performance.now(); // --- TOTAL TIMED BLOCK START ---
 
@@ -70,7 +72,10 @@ export default function htmlMinifier(
 							continue;
 						}
 
-						const relativeAssetPath = getRelativePath(distPath, assetPath);
+						const relativeAssetPath = getRelativePath(
+							distPath,
+							assetPath,
+						);
 						const logLineAssetPath = `  ${logLineArrow} /${relativeAssetPath} `;
 						tasks.push(async () => {
 							try {
@@ -80,10 +85,14 @@ export default function htmlMinifier(
 									encoding: "utf8",
 									signal,
 								});
-								const minifiedHTML = await minifyHTML(html, minifyHTMLOptions);
+								const minifiedHTML = await minifyHTML(
+									html,
+									minifyHTMLOptions,
+								);
 
 								const savings =
-									Buffer.byteLength(html) - Buffer.byteLength(minifiedHTML);
+									Buffer.byteLength(html) -
+									Buffer.byteLength(minifiedHTML);
 								const hasSavings = savings > 0;
 								if (hasSavings || alwaysWriteMinifiedHTML) {
 									// Only write the minified HTML to the file if it's smaller,
@@ -135,7 +144,8 @@ export default function htmlMinifier(
 									signal.aborted &&
 									error instanceof Error &&
 									error.name === "AbortError" &&
-									error.message === "The operation was aborted";
+									error.message ===
+										"The operation was aborted";
 								const errorLogLineArrow = styleText(
 									isAborted ? "yellow" : "red",
 									"▶",
@@ -153,7 +163,10 @@ export default function htmlMinifier(
 													// The stack trace gets logged after we rethrow.
 													`(${JSON.stringify(String(error))}) `,
 												)) +
-										styleText("dim", `(${++tasksDone}/${tasksTotal})`),
+										styleText(
+											"dim",
+											`(${++tasksDone}/${tasksTotal})`,
+										),
 								);
 								throw error;
 							}
@@ -211,7 +224,9 @@ export default function htmlMinifier(
 					totalTime < 1000
 						? `${Math.round(totalTime)}ms`
 						: `${(totalTime / 1000).toFixed(2)}s`;
-				logger.info(styleText("green", `✓ Completed in ${totalTimeWithUnit}.`));
+				logger.info(
+					styleText("green", `✓ Completed in ${totalTimeWithUnit}.`),
+				);
 			},
 		},
 	};
