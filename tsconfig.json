@@ -1,5 +1,7 @@
-// TypeScript configuration
-// See: https://www.typescriptlang.org/tsconfig
+/********************************************/
+/*              TSConfig file               */
+/* https://www.typescriptlang.org/tsconfig/ */
+/********************************************/
 
 {
   "$schema": "https://json.schemastore.org/tsconfig",

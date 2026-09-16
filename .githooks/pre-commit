@@ -1,9 +1,10 @@
-#!/usr/bin/env sh
-# Git hook file
-# See: https://git-scm.com/docs/githooks
-################# SETUP #################
-export PATH="node_modules/.bin:${PATH}" #
-set -o errexit -o xtrace -o nounset     #
-#########################################
+#!/usr/bin/env bash
+set -euo pipefail -x
+#####################################
+#           Git hook file           #
+# https://git-scm.com/docs/githooks #
+#####################################
+
+export PATH="node_modules/.bin:${PATH}"
 
 biome check --staged --no-errors-on-unmatched
