@@ -64,7 +64,7 @@ jobs:
         run: |
           package_name="$(pnpm pkg get name)"
           package_version="$(pnpm pkg get version)"
-          PACKAGE_TARBALL="${package_name}-{package_version}.tgz"
+          PACKAGE_TARBALL="${package_name}-${package_version}.tgz"
           echo "PACKAGE_TARBALL=${PACKAGE_TARBALL}" >> "${GITHUB_ENV}"
 
           pnpm pack --out="${PACKAGE_TARBALL}"
