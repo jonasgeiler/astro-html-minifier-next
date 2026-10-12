@@ -36,7 +36,7 @@
     "@biomejs/biome": "2.5.15",
     "@types/node": "26.6.4",
     "astro": "7.3.8",
-    "typescript": "5.9.3"
+    "typescript": "7.0.2"
   },
   "type": "module",
   "files": [
