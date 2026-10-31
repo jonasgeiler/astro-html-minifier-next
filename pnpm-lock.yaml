@@ -167,8 +167,8 @@ importers:
   .:
     dependencies:
       html-minifier-next:
-        specifier: ^8.4.5
-        version: 8.11.0
+        specifier: ^9.0.0
+        version: 9.1.1
     devDependencies:
       '@biomejs/biome':
         specifier: 2.5.15
@@ -994,8 +994,8 @@ packages:
   html-escaper@3.0.3:
     resolution: {integrity: sha512-RuMffC89BOWQoY0WKGpIhn5gX3iI54O6nRA0yC124NYVtzjmFWBIiFd8M0x+ZdX0P9R4lADg1mgP8C7PxGOWuQ==}
 
-  html-minifier-next@8.11.0:
-    resolution: {integrity: sha512-DOdvMAS4B2mrIiy5M8sMVtp/Z8Z4K1cSon58i4pPxl4gY0eCb0/7IZs2B97IQI0zKvHej3wEnWabri4UN/8XGw==}
+  html-minifier-next@9.1.1:
+    resolution: {integrity: sha512-4quoZsm1cXljbnGcfnTh0Uq/JM0DBEH83bk8wYDGFXhsEcK9o8EqOy9kz4N/AfsWX9uuLJfhS2K5JwnG5KPyuQ==}
     engines: {node: '>=22.13'}
     hasBin: true
     peerDependencies:
@@ -2269,7 +2269,7 @@ snapshots:
 
   html-escaper@3.0.3: {}
 
-  html-minifier-next@8.11.0:
+  html-minifier-next@9.1.1:
     dependencies:
       commander: 15.0.0
       entities: 8.1.0
