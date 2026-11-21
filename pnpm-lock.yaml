@@ -167,8 +167,8 @@ importers:
   .:
     dependencies:
       html-minifier-next:
-        specifier: ^8.4.5
-        version: 8.11.0
+        specifier: ^9.0.0
+        version: 9.1.2
     devDependencies:
       '@biomejs/biome':
         specifier: 2.5.15
@@ -1049,8 +1049,8 @@ packages:
     resolution: {integrity: sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==}
     engines: {node: '>=0.12'}
 
-  entities@8.1.0:
-    resolution: {integrity: sha512-kxL7msIffSuh9aaFAMD7rxAIuTRMAHMeBtgHW2yUdWw732ZNh4MehkF2gdjvtdmikkaIP9bFDDJOPlsvm7avrA==}
+  entities@9.0.0:
+    resolution: {integrity: sha512-oJFNDJg3kTPwAD1cNn2+WmUq4wFoo09npc3Ydf1D7ED4smRiWrsKnaLxykrTWgyGEcusc87P5dxlAleol9kpkg==}
     engines: {node: '>=20.19.0'}
 
   es-module-lexer@3.0.5:
@@ -1119,8 +1119,8 @@ packages:
   html-escaper@3.0.3:
     resolution: {integrity: sha512-RuMffC89BOWQoY0WKGpIhn5gX3iI54O6nRA0yC124NYVtzjmFWBIiFd8M0x+ZdX0P9R4lADg1mgP8C7PxGOWuQ==}
 
-  html-minifier-next@8.11.0:
-    resolution: {integrity: sha512-DOdvMAS4B2mrIiy5M8sMVtp/Z8Z4K1cSon58i4pPxl4gY0eCb0/7IZs2B97IQI0zKvHej3wEnWabri4UN/8XGw==}
+  html-minifier-next@9.1.2:
+    resolution: {integrity: sha512-51a1Thb6AiyDf4Bj0ulPFk0IEsTnKAr5wuTxM5K6KOVl8cEiL1BNTQzw8sXwA1CbIkL6rMIOa9AtwA/LjAnKaA==}
     engines: {node: '>=22.13'}
     hasBin: true
     peerDependencies:
@@ -2410,7 +2410,7 @@ snapshots:
 
   entities@4.5.0: {}
 
-  entities@8.1.0: {}
+  entities@9.0.0: {}
 
   es-module-lexer@3.0.5: {}
 
@@ -2485,10 +2485,10 @@ snapshots:
 
   html-escaper@3.0.3: {}
 
-  html-minifier-next@8.11.0:
+  html-minifier-next@9.1.2:
     dependencies:
       commander: 15.1.0
-      entities: 8.1.0
+      entities: 9.0.0
       lightningcss: 1.33.0
       svgo: 4.1.0
       terser: 5.51.2
